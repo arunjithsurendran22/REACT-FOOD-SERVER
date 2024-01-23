@@ -15,6 +15,7 @@ import {
   getAllPincode,
   vendorOrderList,
   updateOrderStatus,
+  getSpecificProductItem,
 } from "../controller/controller.js";
 import { vendorAuthenticate } from "../middleware/vendorAuthMiddleware.js";
 import { uploading } from "../multer/multer.js";
@@ -28,10 +29,11 @@ router.put("/add-on-category/update/:categoryId", vendorAuthenticate, uploading,
 router.delete("/add-on-category/delete/:categoryId", vendorAuthenticate, uploading, deleteFoodCategory);
 
 // Restaurant: Menu Item
-router.get("/add-on-item/get/list", vendorAuthenticate, getAllProductItems);
+router.get("/add-on-item/get/list", vendorAuthenticate,  getAllProductItems );
+router.get("/add-on-item/get/specific-product/:productId",vendorAuthenticate, getSpecificProductItem)
 router.post("/add-on-item/create/:categoryId", vendorAuthenticate, uploading, addProductItem);
-router.put("/add-on-item/update/:productItemId", vendorAuthenticate, uploading, updateProductItem);
-router.delete("/add-on-item/delete/:productItemId", vendorAuthenticate, uploading, deleteProductItem);
+router.put("/add-on-item/update/:productId", vendorAuthenticate, uploading, updateProductItem);
+router.delete("/add-on-item/delete/:productId", vendorAuthenticate, uploading, deleteProductItem);
 
 // Restaurant: Coupon
 router.post("/coupons/create", vendorAuthenticate, addCoupon);
