@@ -353,15 +353,10 @@ const vendorCustomers = async (req, res, next) => {
 
     // Find user details from the userModel
     const userDetails = await userModel.findById(userId);
-
-    const { name, email, mobile, image } = userDetails;
-
+    
     res.status(200).json({
       message: "UserData fetched successfully",
-      name,
-      email,
-      mobile,
-      image,
+      userDetails,
     });
   } catch (error) {
     next(error);
