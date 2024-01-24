@@ -40,17 +40,22 @@ const vendorOrderList = async (req, res, next) => {
     const userAddress = await userAddressModel.findById(addressId);
 
     const { name, email, mobile } = userData;
+    const orderListData = [
+      {
+        orderId,
+        paymentId,
+        total,
+        status,
+        createdAt,
+        name,
+        email,
+        mobile,
+      },
+    ];
 
     res.status(200).json({
       message: "Successfully fetched Order List",
-      name,
-      email,
-      mobile,
-      orderId,
-      paymentId,
-      total,
-      status,
-      createdAt,
+      orderListData,
       cartItems,
       userAddress,
     });
@@ -66,7 +71,8 @@ const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId, newStatus } = req.body;
     const vendorId = req.vendorId;
-
+    console.log("order",orderId);
+    console.log("status",newStatus);
     // Unauthorized
     if (!vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -97,6 +103,5 @@ const updateOrderStatus = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export { vendorOrderList, updateOrderStatus };
