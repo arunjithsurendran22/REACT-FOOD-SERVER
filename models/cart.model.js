@@ -19,7 +19,7 @@ const cartItemSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "vendor",
       },
-      title: {
+      productTitle: {
         type: String,
         required: true,
       },
