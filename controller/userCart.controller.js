@@ -8,6 +8,7 @@ import {
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { log } from "console";
 
 dotenv.config();
 
@@ -20,7 +21,6 @@ const addToCart = async (req, res, next) => {
     const { productId } = req.params;
     const userId = req.userId;
 
-    console.log("params", productId);
     // Check if user is authenticated
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -105,7 +105,7 @@ const addToCart = async (req, res, next) => {
 const updateQuantity = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const productId = req.params.productId;
+    const { Id } = req.params;
     const { quantity } = req.body;
 
     // If the user is not authenticated
@@ -119,9 +119,9 @@ const updateQuantity = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Find the cart item
+    // Find the cart item and update the quantity
     const cartItem = await cartModel.findOneAndUpdate(
-      { userId, "products.productId": productId },
+      { userId, "products._id": Id },
       { $set: { "products.$.quantity": quantity } },
       { new: true }
     );
@@ -130,13 +130,23 @@ const updateQuantity = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found in the cart" });
     }
 
+    // Recalculate the total price for each product in the cart
+    cartItem.products.forEach((product) => {
+      product.totalPrice = product.price * product.quantity;
+    });
+
     // Calculate the total price
     const total = cartItem.products.reduce(
       (acc, item) => acc + item.totalPrice,
       0
     );
 
-    res.status(200).json({ message: "Quantity updated successfully", total });
+    // Save the updated cart
+    await cartItem.save();
+
+    res
+      .status(200)
+      .json({ message: "Quantity updated successfully", cartItem, total });
   } catch (error) {
     next(error);
     console.error(error);
@@ -148,48 +158,36 @@ const updateQuantity = async (req, res, next) => {
 const removeCartItem = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { productId } = req.params;
-    console.log(userId);
+    const { Id } = req.params;
 
     //check if user is Authenticated
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
     //find user
     const existingUser = await userModel.findById(userId);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    // Find the cart item
-    const cartItem = await cartModel.findOne({ userId });
-    console.log(cartItem);
+    // Find the cart item and remove the specified product
+    const cartItem = await cartModel.findOneAndUpdate(
+      { userId },
+      { $pull: { products: { _id: Id } } },
+      { new: true }
+    );
+    // If the cart item is not found
     if (!cartItem) {
       return res.status(404).json({ message: "Cart not found for the user" });
     }
-    // Find the product in the cart
-    const productIndex = cartItem.products.findIndex(
-      (product) => String(product.productId) === productId
-    );
-    if (productIndex === -1) {
-      return res.status(404).json({ message: "Cart empty" });
-    }
-    // Remove the product from the cart
-    const removedProduct = cartItem.products.splice(productIndex, 1);
-
-    // Save the updated cartItem
-    await cartItem.save();
-
     // Calculate the total price
     const total = cartItem.products.reduce(
       (acc, item) => acc + item.totalPrice,
       0
     );
-
     res.status(200).json({
       message: "Product removed from cart successfully",
-      removedProduct,
+      cartItem,
       total,
     });
   } catch (error) {

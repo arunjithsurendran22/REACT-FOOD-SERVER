@@ -26,8 +26,8 @@ router.get("/restaurant/get/list",userGetAllRestaurant)
 //cart list
 router.get("/cart-items/get/list", userAuthenticate, viewCart);
 router.post("/add-to-cart/create/:productId", userAuthenticate, addToCart);
-router.put("/add-to-cart/update/:productId",userAuthenticate,updateQuantity)
-router.delete("/cart-items-delete/:productId", userAuthenticate,removeCartItem);
+router.put("/add-to-cart/update/:Id",userAuthenticate,updateQuantity)
+router.delete("/cart-items-delete/:Id", userAuthenticate,removeCartItem);
 //add to favorites
 router.post("/add-to-favorites/create/:userId/:productId" ,userAuthenticate, addToFavorites)
 router.delete("/add-to-favorites/delete/:userId/:productId", userAuthenticate, removefromFavorites)
