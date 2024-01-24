@@ -20,6 +20,10 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "FoodCategory",

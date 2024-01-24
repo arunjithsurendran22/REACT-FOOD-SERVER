@@ -240,7 +240,7 @@ const getAllProductItems = async (req, res, next) => {
       const productItems = await productModel.find({
         vendorId: vendorId,
       });
-
+      
       res.status(200).json(productItems);
     } else {
       return res.status(404).json({ message: "Vendor Role mismatch" });

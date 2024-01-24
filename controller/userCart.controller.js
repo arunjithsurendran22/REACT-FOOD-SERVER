@@ -31,13 +31,24 @@ const addToCart = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Check if the product exists
+    const product = await productModel.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     // Check if the user has an existing cart item
-    let cartItem = await cartModel.findOne({ userId });
+    let cartItem = await cartModel.findOne({
+      userId,
+      vendorId: product.vendorId,
+    });
 
     if (!cartItem) {
-      // If the user doesn't have a cart item, create a new one
+      // If the user doesn't have a cart item for the same vendor, create a new one
       cartItem = new cartModel({
         userId: userId,
+        vendorId: product.vendorId,
         products: [],
       });
     }
@@ -55,16 +66,11 @@ const addToCart = async (req, res, next) => {
         cartItem.products[existingProductIndex].quantity;
     } else {
       // If the product doesn't exist, add it to the cart
-      const product = await productModel.findById(productId);
-
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
 
       cartItem.products.push({
         productId: product._id,
         vendorId: product.vendorId,
-        title: product.title,
+        title: product.productTitle,
         price: product.price,
         image: product.image,
         quantity: 1,
