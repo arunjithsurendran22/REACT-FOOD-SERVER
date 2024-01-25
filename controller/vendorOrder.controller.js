@@ -18,46 +18,16 @@ const vendorOrderList = async (req, res, next) => {
 
     // Check if vendor exists
     const existVendor = await vendorModel.findById(vendorId);
+
     if (!existVendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
     // Find orders by vendorId
     const orderList = await orderModel.find({ vendorId: vendorId });
 
-    const {
-      orderId,
-      paymentId,
-      cartId,
-      userId,
-      addressId,
-      total,
-      status,
-      createdAt,
-    } = orderList[0];
-
-    const cartItems = await cartModel.findById(cartId);
-    const userData = await userModel.findById(userId);
-    const userAddress = await userAddressModel.findById(addressId);
-
-    const { name, email, mobile } = userData;
-    const orderListData = [
-      {
-        orderId,
-        paymentId,
-        total,
-        status,
-        createdAt,
-        name,
-        email,
-        mobile,
-      },
-    ];
-
     res.status(200).json({
       message: "Successfully fetched Order List",
-      orderListData,
-      cartItems,
-      userAddress,
+      orderList,
     });
   } catch (error) {
     console.error("Failed to fetch order details", error);
@@ -71,8 +41,7 @@ const updateOrderStatus = async (req, res, next) => {
   try {
     const { orderId, newStatus } = req.body;
     const vendorId = req.vendorId;
-    console.log("order",orderId);
-    console.log("status",newStatus);
+
     // Unauthorized
     if (!vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -104,4 +73,40 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
-export { vendorOrderList, updateOrderStatus };
+//GET :user Address and products
+const getUserAddressAndItems = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const vendorId = req.vendorId;
+    //Unauthorized
+    if (!vendorId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    //check if vendor is exists
+    const existingVendor = await vendorModel.findById(vendorId);
+
+    if (!existingVendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+    // Find the order by orderId
+    const order = await orderModel.findOne({ orderId });
+    // If order not found
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    // Extract user address and cart items from the order
+    const { address, cartItems } = order;
+    res
+      .status(200)
+      .json({
+        message: "Successfully fetched address and Cart Items",
+        address,
+        cartItems,
+      });
+  } catch (error) {
+    next(error);
+    console.error("Failed to fetch address and products");
+  }
+};
+
+export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };

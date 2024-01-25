@@ -331,7 +331,7 @@ const validatePayment = async (req, res, next) => {
   }
 };
 
-//POST:payment details will save to database
+//POST: payment details will save to database
 const order = async (req, res, next) => {
   try {
     const { orderId, paymentId, cartId, userId, addressId, vendorId, total } =
@@ -347,24 +347,61 @@ const order = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Fetch all details from the user
+    const userDetails = await userModel.findById(userId);
+    // Fetch user details from the userModel
+    const userAddress = await userAddressModel.findById(addressId);
+    // Fetch cart items from the cart model
+    const cartData = await cartModel.findById(cartId).lean();
+    const cartItems = cartData ? cartData.products : [];
+
+    // Create an array to store the structured cart items
+    const formattedCartItems = [];
+
+    // Iterate through each product in the cartItems array
+    for (const product of cartItems) {
+      formattedCartItems.push({
+        productId: product.productId,
+        vendorId: product.vendorId,
+        productTitle: product.productTitle,
+        price: product.price,
+        image: product.image,
+        quantity: product.quantity,
+        totalPrice: product.totalPrice,
+        _id: product._id,
+      });
+    }
+
+    // Create the order details object
     const orderDetails = new orderModel({
       orderId,
       paymentId,
-      cartId,
-      userId,
-      addressId,
       vendorId,
       total,
+      name: userDetails.name,
+      email: userDetails.email,
+      mobile: userDetails.mobile,
+      address: {
+        street: userAddress.street,
+        city: userAddress.city,
+        state: userAddress.state,
+        landmark: userAddress.landmark,
+        pincode: userAddress.pincode,
+      },
+      cartItems: formattedCartItems,
     });
+
     await orderDetails.save();
+
     res
       .status(200)
       .json({ message: "Successfully saved Order Details", orderDetails });
   } catch (error) {
     next(error);
-    console.error("failed to save database");
+    console.error("Failed to save to the database");
   }
 };
+
 export {
   addToCart,
   viewCart,

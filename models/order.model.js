@@ -9,18 +9,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  cartId: {
-    type: String,
-    required: true,
-  },
-  userId: {
-    type: String,
-    required: true,
-  },
-  addressId: {
-    type: String,
-    required: true,
-  },
   vendorId: {
     type: String,
     required: true,
@@ -37,6 +25,64 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  mobile: {
+    type: String,
+    required: true,
+  },
+  address: {
+    street: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    landmark: {
+      type: String,
+    },
+    pincode: {
+      type: Number,
+      required: true,
+    },
+  },
+  cartItems: [
+    {
+
+      productTitle: {
+        type: String,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      image: {
+        type: String,
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+      totalPrice: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
 });
 
 const orderModel = mongoose.model("order", orderSchema);
