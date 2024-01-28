@@ -13,6 +13,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+  },
   total: {
     type: Number,
     required: true,
@@ -60,7 +64,6 @@ const orderSchema = new mongoose.Schema({
   },
   cartItems: [
     {
-
       productTitle: {
         type: String,
         required: true,

@@ -102,7 +102,8 @@ import {
   removefromFavorites,
   getAllFavorites,
 } from "./userFavorites.controller.js";
-
+//user order details
+import { orderDetails } from "./userOrder.controller.js";
 //-------------------------------------------------------------------------------------------------
 //exporting controller endponits
 
@@ -161,7 +162,7 @@ export {
   deleteUserAddress,
   getUserAddresses,
 };
-export { vendorOrderList, updateOrderStatus ,getUserAddressAndItems};
+export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };
@@ -181,3 +182,6 @@ export { addPincodeAndDeliveryFee, updateDeliveryFee, getAllPincode };
 
 //favorites
 export { addToFavorites, removefromFavorites, getAllFavorites };
+
+//user order details
+export { orderDetails };

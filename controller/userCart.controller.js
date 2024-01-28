@@ -377,6 +377,7 @@ const order = async (req, res, next) => {
       orderId,
       paymentId,
       vendorId,
+      userId,
       total,
       name: userDetails.name,
       email: userDetails.email,

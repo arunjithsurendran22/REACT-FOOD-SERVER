@@ -14,6 +14,7 @@ import {
   orderPayment,
   validatePayment,
   order,
+  orderDetails,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -39,5 +40,8 @@ router.post("/select-address/add-to-cart/:addressId", userAuthenticate, selectAd
 router.post("/order", userAuthenticate, orderPayment)
 router.post("/order/validate", userAuthenticate , validatePayment)
 router.post("/order/payment",userAuthenticate , order)
+
+//Order details
+router.get("/order-list/get",userAuthenticate , orderDetails)
 
 export default router;
