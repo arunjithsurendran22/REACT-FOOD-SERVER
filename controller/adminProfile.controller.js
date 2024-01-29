@@ -1,4 +1,4 @@
-import { adminModel, vendorModel } from "../models/model.js";
+import { adminModel, vendorModel, userModel } from "../models/model.js";
 import { hashPassword, comparePassword } from "../helpers/auth.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -162,21 +162,58 @@ const getAdminProfile = async (req, res, next) => {
 const getAllVendors = async (req, res, next) => {
   try {
     const adminId = req.adminId;
+    const role = req.role;
 
-    //Authorization
-    if (!adminId) {
-      return res.json({ message: "Unauthorized" });
+    if (role === "admin") {
+      //Authorization
+      if (!adminId) {
+        return res.json({ message: "Unauthorized" });
+      }
+
+      const vendorData = await vendorModel.find();
+
+      res
+        .status(200)
+        .json({ message: "Successfully fetched Vendor Data", vendorData });
+    } else {
+      console.log("admin not found");
     }
-
-    const vendorData = await vendorModel.find();
-
-    res
-      .status(200)
-      .json({ message: "Successfully fetched Vendor Data", vendorData });
   } catch (error) {
     next(error);
     console.log(error, "failed the user data fetching");
   }
 };
 
-export { registerAdmin, loginAdmin, getAdminProfile ,getAllVendors};
+//GET :get all customers details
+const getAllCustomers = async (req, res, next) => {
+  try {
+    const adminId = req.adminId;
+    const role = req.role;
+
+    if (role === "admin") {
+      //unauthorized
+      if (!adminId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      //check if already admin exists
+      const existingAdmin = await adminModel.findById(adminId);
+
+      if (!existingAdmin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+      //get all customers from userModel
+      const customers = await userModel.find();
+
+      res
+        .status(200)
+        .json({ message: "Successfully fetched userDetails", customers });
+    } else {
+      console.log("admin not found");
+    }
+  } catch (error) {
+    next(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { registerAdmin, loginAdmin, getAdminProfile, getAllVendors ,getAllCustomers};

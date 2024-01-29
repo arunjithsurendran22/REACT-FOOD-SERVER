@@ -7,6 +7,7 @@ import {
   loginAdmin,
   getAdminProfile,
   getAllVendors,
+  getAllCustomers,
 } from "./adminProfile.controller.js";
 import {
   addFoodCategory,
@@ -70,7 +71,6 @@ import {
   vendorOrderList,
   updateOrderStatus,
   getUserAddressAndItems,
-  
 } from "./vendorOrder.controller.js";
 // ------------------------------------------------------------------------------------------------------------
 //importing :get all products for seeing user
@@ -110,7 +110,13 @@ import { orderDetails } from "./userOrder.controller.js";
 
 //Admin endpoints exporting
 //admin profile
-export { registerAdmin, loginAdmin, getAdminProfile, getAllVendors };
+export {
+  registerAdmin,
+  loginAdmin,
+  getAdminProfile,
+  getAllVendors,
+  getAllCustomers,
+};
 //admin product
 export { addFoodCategory, getFoodCategories };
 
@@ -163,12 +169,7 @@ export {
   deleteUserAddress,
   getUserAddresses,
 };
-export {
-  vendorOrderList,
-  updateOrderStatus,
-  getUserAddressAndItems,
-  
-};
+export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };
