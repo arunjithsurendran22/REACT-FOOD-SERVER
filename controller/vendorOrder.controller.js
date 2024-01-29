@@ -4,6 +4,7 @@ import {
   cartModel,
   userModel,
   userAddressModel,
+  productModel,
 } from "../models/model.js";
 
 // GET: vendor order list
@@ -60,9 +61,20 @@ const updateOrderStatus = async (req, res, next) => {
       { $set: { status: newStatus } },
       { new: true }
     );
+    console.log(updatedOrder);
 
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
+    }
+    // Update product quantities if order status is "Delivered"
+    if (newStatus === "Delivered") {
+      for (const item of updatedOrder.cartItems) {
+        const product = await productModel.findById(item.productId);
+        if (product) {
+          product.quantity -= item.quantity;
+          await product.save();
+        }
+      }
     }
 
     // Send the updated order in the response
@@ -96,13 +108,11 @@ const getUserAddressAndItems = async (req, res, next) => {
     }
     // Extract user address and cart items from the order
     const { address, cartItems } = order;
-    res
-      .status(200)
-      .json({
-        message: "Successfully fetched address and Cart Items",
-        address,
-        cartItems,
-      });
+    res.status(200).json({
+      message: "Successfully fetched address and Cart Items",
+      address,
+      cartItems,
+    });
   } catch (error) {
     next(error);
     console.error("Failed to fetch address and products");

@@ -17,6 +17,7 @@ import {
   updateOrderStatus,
   getSpecificProductItem,
   getUserAddressAndItems,
+
 } from "../controller/controller.js";
 import { vendorAuthenticate } from "../middleware/vendorAuthMiddleware.js";
 import { uploading } from "../multer/multer.js";
@@ -49,5 +50,6 @@ router.get("/add-delivery-pincode/get/list", vendorAuthenticate, getAllPincode)
 router.get("/orders-list/get", vendorAuthenticate ,vendorOrderList )
 router.post("/update-order-status",vendorAuthenticate,updateOrderStatus)
 router.get("/orders-list/address-products/get/:orderId" ,vendorAuthenticate , getUserAddressAndItems)
+
 
 export default router;

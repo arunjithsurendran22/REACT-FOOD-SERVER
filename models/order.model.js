@@ -64,6 +64,10 @@ const orderSchema = new mongoose.Schema({
   },
   cartItems: [
     {
+      productId: {
+        type: String,
+        required: true,
+      },
       productTitle: {
         type: String,
         required: true,

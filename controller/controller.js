@@ -70,6 +70,7 @@ import {
   vendorOrderList,
   updateOrderStatus,
   getUserAddressAndItems,
+  
 } from "./vendorOrder.controller.js";
 // ------------------------------------------------------------------------------------------------------------
 //importing :get all products for seeing user
@@ -162,7 +163,12 @@ export {
   deleteUserAddress,
   getUserAddresses,
 };
-export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
+export {
+  vendorOrderList,
+  updateOrderStatus,
+  getUserAddressAndItems,
+  
+};
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };
