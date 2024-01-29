@@ -24,6 +24,10 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  inStock: {
+    type: Boolean,
+    default: true,
+  },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "FoodCategory",

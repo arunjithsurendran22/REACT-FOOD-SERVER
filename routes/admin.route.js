@@ -1,6 +1,7 @@
 import express from "express";
 import adminProfileRoute from "./adminProfile.route.js";
 import adminProductsRoute from "./adminProduct.route.js";
+import adminDashboardRoute from "./adminDashboard.route.js";
 
 const router = express.Router();
 
@@ -12,6 +13,10 @@ const defaultRoutes = [
   {
     path: "/admin/products",
     route: adminProductsRoute,
+  },  
+  {
+    path: "/admin/dashboard",
+    route: adminDashboardRoute,
   },
 ];
 

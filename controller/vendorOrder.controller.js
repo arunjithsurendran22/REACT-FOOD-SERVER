@@ -72,6 +72,9 @@ const updateOrderStatus = async (req, res, next) => {
         const product = await productModel.findById(item.productId);
         if (product) {
           product.quantity -= item.quantity;
+          if (product.quantity <= 0) {
+            product.inStock = false;
+          }
           await product.save();
         }
       }

@@ -13,6 +13,7 @@ import {
   addFoodCategory,
   getFoodCategories,
 } from "./adminProduct.controller.js";
+import { dashboardStatus } from "./adminDashboard.controller.js";
 // ---------------------------------------------------------------------------------
 //Vendor endpoints
 // ---------------------------------------------------------------------------------
@@ -72,6 +73,8 @@ import {
   updateOrderStatus,
   getUserAddressAndItems,
 } from "./vendorOrder.controller.js";
+//vendor dashboard
+import { getCustomerCount } from "./vendorDashboard.controller.js";
 // ------------------------------------------------------------------------------------------------------------
 //importing :get all products for seeing user
 // ---------------------------------------------------------------------------------
@@ -119,7 +122,8 @@ export {
 };
 //admin product
 export { addFoodCategory, getFoodCategories };
-
+export { dashboardStatus };
+// -----------------------------------------------------------
 //restaurant profile
 export {
   registerVendor,
@@ -170,6 +174,7 @@ export {
   getUserAddresses,
 };
 export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
+export { getCustomerCount };
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };

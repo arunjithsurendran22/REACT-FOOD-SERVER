@@ -201,6 +201,7 @@ const addProductItem = async (req, res, next) => {
         image: secure_url,
         categoryId: categoryId,
         vendorId: vendorId,
+        inStock: true, 
       });
 
       await newProductItem.save();
