@@ -4,7 +4,8 @@ import { vendorAddPincodeModel, vendorModel } from "../models/model.js";
 const addPincodeDeliveryFee = async (req, res, next) => {
   try {
     // Extract vendorId, role, pincode, and deliveryFee from request
-    const { vendorId, role } = req;
+    const vendorId = req.vendorId;
+    const role = req.role;
     const { pincode, deliveryFee } = req.body;
 
     // Check if the user is authorized as a vendor
@@ -22,6 +23,7 @@ const addPincodeDeliveryFee = async (req, res, next) => {
     const newPincodeDeliveryFee = new vendorAddPincodeModel({
       pincode: pincode,
       deliveryFee: deliveryFee,
+      vendorId: vendorId,
     });
 
     // Save the new pincode and delivery fee entry
@@ -45,7 +47,7 @@ const getPincodeDeliveryFee = async (req, res, next) => {
   try {
     // Extract vendorId and role from request
     const { vendorId, role } = req;
-
+  
     // Check authorization
     if (role !== "vendor" || !vendorId) {
       return res.status(401).json({ message: "Unauthorized" });

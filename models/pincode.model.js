@@ -12,7 +12,6 @@ const vendorPincodeSchema = new mongoose.Schema({
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "vendor",
-    required: true,
   },
 });
 
