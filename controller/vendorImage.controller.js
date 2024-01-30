@@ -155,64 +155,42 @@ const getAllBanners = async (req, res, next) => {
 const addBackgroundImage = async (req, res, next) => {
   try {
     const vendorId = req.vendorId;
-    const role = req.role;
 
     if (!vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (role === "vendor") {
-      const existingVendor = await vendorModel.findById(vendorId);
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ message: 'Invalid file upload' });
+    }
 
-      if (!existingVendor) {
-        return res.status(404).json({ message: "Vendor not found" });
-      }
+    // Check if vendor exists
+    const existingVendor = await vendorModel.findById(vendorId);
 
-      // Check if there is an existing background image for the vendor
-      let existingBackgroundImage = await vendorBgImgModel.findOne({
-        vendorId: vendorId,
-      });
-
-      if (existingBackgroundImage) {
-        // If an existing image is found, update the URL
-        const { secure_url } = await cloudinary.v2.uploader.upload(
-          req.file.path
-        );
-
-        existingBackgroundImage.backgroundImage = secure_url;
-        await existingBackgroundImage.save();
-
-        return res.status(200).json({
-          message: "Background image updated successfully",
-          backgroundImage: existingBackgroundImage,
-        });
-      } else {
-        // If no existing image is found, create a new background image record
-        const { secure_url } = await cloudinary.v2.uploader.upload(
-          req.file.path
-        );
-
-        const newBackgroundImage = new vendorModel({
-          backgroundImage: secure_url,
-          vendorId: vendorId,
-        });
-
-        await newBackgroundImage.save();
-
-        return res.status(201).json({
-          message: "Background image uploaded successfully",
-          backgroundImage: newBackgroundImage,
-        });
-      }
-    } else {
+    if (!existingVendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
+
+    // Upload image to cloudinary
+    const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
+
+    // Create new background image entry in the database
+    const newBackgroundImage = await vendorBgImgModel.create({
+      image: secure_url,
+      vendorId: vendorId,
+    });
+
+    res.status(201).json({
+      message: "Background image uploaded successfully",
+      image: newBackgroundImage,
+    });
   } catch (error) {
     next(error);
-    console.error(error, "Error for adding/updating background image");
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.error(error, "Error adding background image");
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 // GET: Get background image endpoint
 const getBackgroundImage = async (req, res, next) => {

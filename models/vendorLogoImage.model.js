@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
 
 const vendorlogoImageSchema = new mongoose.Schema({
-  logoImage: {
+  image: {
     type: String,
-    required: true,
   },
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "vendor",
-    required: true,
   },
 });
 

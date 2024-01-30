@@ -1,17 +1,21 @@
 import mongoose from "mongoose";
 
 const vendorBgImgSchema = new mongoose.Schema({
-  backgroundImage: {
+  image: {
     type: String,
-    required: true,
+  },
+  imageId: {
+    type: String,
   },
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "vendor",
-    required: true,
   },
 });
 
-const vendorBgImgModel = mongoose.model("vendorBackgroundImg",vendorBgImgSchema);
+const vendorBgImgModel = mongoose.model(
+  "vendorBackgroundImg",
+  vendorBgImgSchema
+);
 
 export default vendorBgImgModel;

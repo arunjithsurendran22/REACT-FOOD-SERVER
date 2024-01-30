@@ -6,6 +6,7 @@ const vendorAuthenticate = (req, res, next) => {
   try {
     const authorizationHeader = req.headers['authorization'];
     
+
     if (!authorizationHeader) {
       return res.status(401).json({ message: 'Access token is missing' });
     }
