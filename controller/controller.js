@@ -75,6 +75,13 @@ import {
 } from "./vendorOrder.controller.js";
 //vendor dashboard
 import { getCustomerCount } from "./vendorDashboard.controller.js";
+
+import {
+  addPincodeDeliveryFee,
+  getPincodeDeliveryFee,
+  editPincodeDeliveryFee,
+  deletePincodeDeliveryFee,
+} from "./vendorDelivery.controller.js";
 // ------------------------------------------------------------------------------------------------------------
 //importing :get all products for seeing user
 // ---------------------------------------------------------------------------------
@@ -94,12 +101,7 @@ import {
   validatePayment,
   order,
 } from "./userCart.controller.js";
-//add pincode for delivery
-import {
-  addPincodeAndDeliveryFee,
-  updateDeliveryFee,
-  getAllPincode,
-} from "./vendorAddPin.controller.js";
+
 //favorites
 import {
   addToFavorites,
@@ -161,6 +163,7 @@ export {
 };
 //coupon
 export { addCoupon, getAllCoupons };
+
 //customer profile
 export {
   userRegister,
@@ -175,6 +178,12 @@ export {
 };
 export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
 export { getCustomerCount };
+export {
+  addPincodeDeliveryFee,
+  getPincodeDeliveryFee,
+  editPincodeDeliveryFee,
+  deletePincodeDeliveryFee,
+};
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };
@@ -189,8 +198,6 @@ export {
   validatePayment,
   order,
 };
-//add pincode for delivery
-export { addPincodeAndDeliveryFee, updateDeliveryFee, getAllPincode };
 
 //favorites
 export { addToFavorites, removefromFavorites, getAllFavorites };

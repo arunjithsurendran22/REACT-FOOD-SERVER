@@ -10,9 +10,6 @@ import {
   deleteProductItem,
   addCoupon,
   getAllCoupons,
-  addPincodeAndDeliveryFee,
-  updateDeliveryFee,
-  getAllPincode,
   vendorOrderList,
   updateOrderStatus,
   getSpecificProductItem,
@@ -40,11 +37,6 @@ router.delete("/add-on-item/delete/:productId", vendorAuthenticate, uploading, d
 // Restaurant: Coupon
 router.post("/coupons/create", vendorAuthenticate, addCoupon);
 router.get("/coupons/list", vendorAuthenticate, getAllCoupons);
-
-//addPincode for delivery area
-router.post("/add-delivery-pincode/create", vendorAuthenticate, addPincodeAndDeliveryFee)
-router.put("/add-delivery-pincode/update/:pincodeId", vendorAuthenticate, updateDeliveryFee)
-router.get("/add-delivery-pincode/get/list", vendorAuthenticate, getAllPincode)
 
 //order list
 router.get("/orders-list/get", vendorAuthenticate ,vendorOrderList )

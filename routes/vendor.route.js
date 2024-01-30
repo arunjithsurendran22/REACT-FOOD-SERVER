@@ -2,7 +2,8 @@ import express from "express";
 import vendorProfileRoute from "./vendorProfile.route.js";
 import vendorProductRoute from "./vendorProduct.route.js";
 import vendorImageRoute from "./vendorImage.route.js";
-import vendorDashboard from "./vendorDashboard.route.js";
+import vendorDashboardRoute from "./vendorDashboard.route.js";
+import vendorDeliveryRoute from "./vendorDelivery.route.js";
 
 const router = express.Router();
 
@@ -21,7 +22,11 @@ const defaultRoutes = [
   },
   {
     path: "/vendor/dashboard",
-    route: vendorDashboard,
+    route: vendorDashboardRoute,
+  },
+  {
+    path: "/vendor/delivery",
+    route: vendorDeliveryRoute,
   },
 ];
 
