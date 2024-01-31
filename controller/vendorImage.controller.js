@@ -307,7 +307,7 @@ const addLogoImage = async (req, res, next) => {
         );
 
         const newLogoImage = new vendorlogoModel({
-          logoImage: secure_url,
+          image: secure_url,
           vendorId: vendorId,
         });
 
