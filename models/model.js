@@ -13,6 +13,7 @@ import vendorAddPincodeModel from "./pincode.model.js";
 import favoritesModel from "./userFavorites.model.js";
 import vendorAddressModel from "./vendorAddress.model.js";
 import orderModel from "./order.model.js";
+import workingTimeModel from "./vendorWorkingTime.model.js"
 // ---------------------------------------------------------------------
 // ADMIN
 import adminModel from "./admin.model.js";
@@ -36,4 +37,5 @@ export {
   adminModel,
   vendorAddressModel,
   orderModel,
+  workingTimeModel,
 };

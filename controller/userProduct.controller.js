@@ -35,7 +35,7 @@ const userGetAllProductItems = async (req, res, next) => {
 //GET:get all popular restaurant endpoint
 const userGetAllRestaurant = async (req, res, next) => {
   try {
-    const restaurants = await vendorBgImgModel.find();
+    const restaurants = await vendorBgImgModel.find()
     res.status(200).json({ message: "Successfully fetched data", restaurants });
   } catch (error) {
     next(error);

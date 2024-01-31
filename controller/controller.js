@@ -82,6 +82,7 @@ import {
   editPincodeDeliveryFee,
   deletePincodeDeliveryFee,
 } from "./vendorDelivery.controller.js";
+import { createWorkingHours } from "./vendorSettings.controller.js";
 // ------------------------------------------------------------------------------------------------------------
 //importing :get all products for seeing user
 // ---------------------------------------------------------------------------------
@@ -184,6 +185,7 @@ export {
   editPincodeDeliveryFee,
   deletePincodeDeliveryFee,
 };
+export { createWorkingHours };
 //---------------------------------------------------
 //exporting all products for users
 export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };

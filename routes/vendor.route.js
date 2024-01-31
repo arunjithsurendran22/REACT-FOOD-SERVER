@@ -4,6 +4,7 @@ import vendorProductRoute from "./vendorProduct.route.js";
 import vendorImageRoute from "./vendorImage.route.js";
 import vendorDashboardRoute from "./vendorDashboard.route.js";
 import vendorDeliveryRoute from "./vendorDelivery.route.js";
+import vendorSettingsRoute from "./vendorSettings.route.js";
 
 const router = express.Router();
 
@@ -27,6 +28,10 @@ const defaultRoutes = [
   {
     path: "/vendor/delivery",
     route: vendorDeliveryRoute,
+  },
+  {
+    path: "/vendor/settings",
+    route: vendorSettingsRoute,
   },
 ];
 

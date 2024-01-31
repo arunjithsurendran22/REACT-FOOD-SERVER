@@ -4,9 +4,7 @@ const vendorBgImgSchema = new mongoose.Schema({
   image: {
     type: String,
   },
-  imageId: {
-    type: String,
-  },
+
   vendorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "vendor",

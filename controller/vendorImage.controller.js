@@ -151,7 +151,6 @@ const getAllBanners = async (req, res, next) => {
 
 //   -------------------------------------------------------------------------------------------------
 
-// POST: background image upload endpoint
 const addBackgroundImage = async (req, res, next) => {
   try {
     const vendorId = req.vendorId;
@@ -171,26 +170,53 @@ const addBackgroundImage = async (req, res, next) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    // Upload image to cloudinary
-    const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
+    // Check if the role is "vendor"
+    if (req.role === "vendor") {
+      // Check if there is an existing background image for the vendor
+      let existingBgImage = await vendorBgImgModel.findOne({
+        vendorId: vendorId,
+      });
 
-    // Create new background image entry in the database
-    const newBackgroundImage = await vendorBgImgModel.create({
-      image: secure_url,
-      vendorId: vendorId,
-    });
+      if (existingBgImage) {
+        // If an existing image is found, update the URL
+        const { secure_url } = await cloudinary.v2.uploader.upload(
+          req.file.path
+        );
 
-    res.status(201).json({
-      message: "Background image uploaded successfully",
-      image: newBackgroundImage,
-    });
+        existingBgImage.image = secure_url;
+        await existingBgImage.save();
+
+        return res.status(200).json({
+          message: "Background image updated successfully",
+          backgroundImage: existingBgImage,
+        });
+      } else {
+        // If no existing image is found, create a new background image record
+        const { secure_url } = await cloudinary.v2.uploader.upload(
+          req.file.path
+        );
+
+        const newBgImage = new vendorBgImgModel({
+          image: secure_url,
+          vendorId: vendorId,
+        });
+
+        await newBgImage.save();
+
+        return res.status(201).json({
+          message: "Background image uploaded successfully",
+          backgroundImage: newBgImage,
+        });
+      }
+    } else {
+      return res.status(403).json({ message: "Forbidden" });
+    }
   } catch (error) {
+    console.error("Error adding background image:", error);
     next(error);
-    console.error(error, "Error adding background image");
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 // GET: Get background image endpoint
 const getBackgroundImage = async (req, res, next) => {
