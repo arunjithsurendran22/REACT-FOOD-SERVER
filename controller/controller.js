@@ -14,6 +14,13 @@ import {
   getFoodCategories,
 } from "./adminProduct.controller.js";
 import { dashboardStatus } from "./adminDashboard.controller.js";
+//add coupon
+import {
+  addCoupon,
+  getAllCoupons,
+  updateCoupon,
+  deleteCoupon,
+} from "./Admincoupon.controller.js";
 // ---------------------------------------------------------------------------------
 //Vendor endpoints
 // ---------------------------------------------------------------------------------
@@ -53,8 +60,7 @@ import {
   updateProductItem,
   deleteProductItem,
 } from "./vendorProduct.controller.js";
-//add coupon
-import { addCoupon, getAllCoupons } from "./coupon.controller.js";
+
 //customer Profile Auth
 import {
   userRegister,
@@ -126,6 +132,8 @@ export {
 //admin product
 export { addFoodCategory, getFoodCategories };
 export { dashboardStatus };
+//coupon
+export { addCoupon, getAllCoupons, updateCoupon, deleteCoupon };
 // -----------------------------------------------------------
 //restaurant profile
 export {
@@ -162,8 +170,6 @@ export {
   getLogoImage,
   deleteLogoImage,
 };
-//coupon
-export { addCoupon, getAllCoupons };
 
 //customer profile
 export {

@@ -13,7 +13,7 @@ const defaultRoutes = [
   {
     path: "/admin/products",
     route: adminProductsRoute,
-  },  
+  },
   {
     path: "/admin/dashboard",
     route: adminDashboardRoute,

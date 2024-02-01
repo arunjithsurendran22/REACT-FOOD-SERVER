@@ -3,15 +3,20 @@ import mongoose from "mongoose";
 const couponSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
   },
-  value: {
+  percentage: {
     type: Number,
-    required: true,
   },
-  restaurantId: {
+  createdDate: {
+    type: Date,
+    default: Date.now,
+  },
+  expireDateTime: {
+    type: Date,
+  },
+  adminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "restaurants",
+    ref: "admin",
   },
 });
 

@@ -8,8 +8,6 @@ import {
   addProductItem,
   updateProductItem,
   deleteProductItem,
-  addCoupon,
-  getAllCoupons,
   vendorOrderList,
   updateOrderStatus,
   getSpecificProductItem,
@@ -34,9 +32,6 @@ router.post("/add-on-item/create/:categoryId", vendorAuthenticate, uploading, ad
 router.put("/add-on-item/update/:productId", vendorAuthenticate, uploading, updateProductItem);
 router.delete("/add-on-item/delete/:productId", vendorAuthenticate, uploading, deleteProductItem);
 
-// Restaurant: Coupon
-router.post("/coupons/create", vendorAuthenticate, addCoupon);
-router.get("/coupons/list", vendorAuthenticate, getAllCoupons);
 
 //order list
 router.get("/orders-list/get", vendorAuthenticate ,vendorOrderList )
