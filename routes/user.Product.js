@@ -15,6 +15,8 @@ import {
   validatePayment,
   order,
   orderDetails,
+  getCoupon,
+  applyCouponCode,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -43,5 +45,9 @@ router.post("/order/payment",userAuthenticate , order)
 
 //Order details
 router.get("/order-list/get",userAuthenticate , orderDetails)
+
+//coupons 
+router.get("/coupon-list/get", userAuthenticate, getCoupon)
+router.post("/coupon-list/apply-coupon/:couponId", userAuthenticate, applyCouponCode)
 
 export default router;

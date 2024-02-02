@@ -2,6 +2,8 @@ import {
   foodCategoryModel,
   productModel,
   vendorBgImgModel,
+  vendorModel,
+  vendorlogoModel,
 } from "../models/model.js";
 
 
@@ -35,8 +37,16 @@ const userGetAllProductItems = async (req, res, next) => {
 //GET:get all popular restaurant endpoint
 const userGetAllRestaurant = async (req, res, next) => {
   try {
-    const restaurants = await vendorBgImgModel.find()
-    res.status(200).json({ message: "Successfully fetched data", restaurants });
+    const vendor =await vendorModel.find()
+    const backgroundImage =vendorBgImgModel.find()
+    const logoImage =vendorlogoModel.find()
+
+    
+    const newArray = vendor.map(({ _id, name }) => ({ _id, name }));
+
+console.log(newArray);
+
+    res.status(200).json({message:"Succesfully",vendor})
   } catch (error) {
     next(error);
     console.log(error, "failed to get restaurant ");

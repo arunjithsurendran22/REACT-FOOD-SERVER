@@ -6,7 +6,9 @@ const cartItemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
-    unique: true,
+  },
+  couponCode: {
+    type: String,
   },
   products: [
     {
@@ -35,15 +37,23 @@ const cartItemSchema = new mongoose.Schema({
         type: Number,
         default: 1,
       },
-
       totalPrice: {
         type: Number,
         default: function () {
-          return this.price * this.quantity;
+          return this.quantity * this.price;
         },
       },
     },
   ],
+  grandTotal: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// Update the grandTotal default function to calculate the sum of totalPrice values
+cartItemSchema.path("grandTotal").get(function () {
+  return this.products.reduce((total, product) => total + product.totalPrice, 0);
 });
 
 const cartModel = mongoose.model("CartItem", cartItemSchema);

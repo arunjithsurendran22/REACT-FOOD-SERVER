@@ -9,7 +9,6 @@ import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-
 dotenv.config();
 
 const keyId = process.env.RAZOR_PAY_KEY_ID;
@@ -37,6 +36,7 @@ const addToCart = async (req, res, next) => {
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
+
     // Check if the product is already in the user's cart
     const existingCartItem = await cartModel.findOne({
       userId,
@@ -45,32 +45,37 @@ const addToCart = async (req, res, next) => {
 
     // Check if the product has the same vendorId as the existing items in the cart
     if (existingCartItem) {
-      const isSameVendor = existingCartItem.products.every(
-        (cartProduct) =>
-          cartProduct.vendorId.toString() === product.vendorId.toString()
-      );
+      const isSameVendor =
+        existingCartItem.products &&
+        existingCartItem.products.every(
+          (cartProduct) =>
+            cartProduct.vendorId.toString() === product.vendorId.toString()
+        );
+
       if (!isSameVendor) {
         return res.status(400).json({
           message:
             "Cannot add products from different vendors to the same cart",
         });
       }
-    }
-    if (existingCartItem) {
+
       // If the product already exists in the cart, increase quantity and update total price
-      await cartModel.findOneAndUpdate(
-        {
-          userId,
-          "products.productId": product._id,
-        },
-        {
-          $inc: { "products.$.quantity": 1 },
-          $set: {
-            "products.$.totalPrice":
-              product.price * (existingCartItem.products[0].quantity + 1),
+      if (existingCartItem.products && existingCartItem.products.length > 0) {
+        await cartModel.findOneAndUpdate(
+          {
+            userId,
+            "products.productId": product._id,
           },
-        }
-      );
+          {
+            $inc: { "products.$.quantity": 1 },
+            $set: {
+              "products.$.totalPrice":
+                product.price * (existingCartItem.products[0].quantity + 1),
+              grandTotal: existingCartItem.grandTotal + product.price,
+            },
+          }
+        );
+      }
     } else {
       // If the product is not in the cart, add it
       await cartModel.findOneAndUpdate(
@@ -87,10 +92,12 @@ const addToCart = async (req, res, next) => {
               totalPrice: product.price,
             },
           },
+          $inc: { grandTotal: product.price },
         },
         { upsert: true }
       );
     }
+
     return res
       .status(200)
       .json({ message: "Product added to cart successfully" });
@@ -135,11 +142,14 @@ const updateQuantity = async (req, res, next) => {
       product.totalPrice = product.price * product.quantity;
     });
 
-    // Calculate the total price
+    // Calculate the total price and grand total
     const total = cartItem.products.reduce(
       (acc, item) => acc + item.totalPrice,
       0
     );
+
+    // Update the grand total in the cart
+    cartItem.grandTotal = total;
 
     // Save the updated cart
     await cartItem.save();
@@ -160,31 +170,47 @@ const removeCartItem = async (req, res, next) => {
     const userId = req.userId;
     const { Id } = req.params;
 
-    //check if user is Authenticated
+    // Check if user is authenticated
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    //find user
+
+    // Find user
     const existingUser = await userModel.findById(userId);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
+
     // Find the cart item and remove the specified product
     const cartItem = await cartModel.findOneAndUpdate(
       { userId },
       { $pull: { products: { _id: Id } } },
       { new: true }
     );
+
     // If the cart item is not found
     if (!cartItem) {
       return res.status(404).json({ message: "Cart not found for the user" });
     }
-    // Calculate the total price
+
+    // Recalculate the total price for each product in the cart
+    cartItem.products.forEach((product) => {
+      product.totalPrice = product.price * product.quantity;
+    });
+
+    // Calculate the total price and grand total
     const total = cartItem.products.reduce(
       (acc, item) => acc + item.totalPrice,
       0
     );
+
+    // Update the grand total in the cart
+    cartItem.grandTotal = total;
+
+    // Save the updated cart
+    await cartItem.save();
+
     res.status(200).json({
       message: "Product removed from cart successfully",
       cartItem,
@@ -215,16 +241,10 @@ const viewCart = async (req, res, next) => {
       return res.status(404).json({ message: "User or cart not found" });
     }
 
-    // Calculate total price
-    const total = cartItem.products.reduce(
-      (acc, item) => acc + item.totalPrice,
-      0
-    );
-
     res.status(200).json({
       message: "Cart retrieved successfully",
       cart: cartItem,
-      total,
+      grandTotal: cartItem.grandTotal,
     });
   } catch (error) {
     next(error);

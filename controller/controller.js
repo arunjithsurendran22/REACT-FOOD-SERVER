@@ -117,6 +117,9 @@ import {
 } from "./userFavorites.controller.js";
 //user order details
 import { orderDetails } from "./userOrder.controller.js";
+
+//user coupons
+import { getCoupon,applyCouponCode } from "./userCoupon.controller.js";
 //-------------------------------------------------------------------------------------------------
 //exporting controller endponits
 
@@ -212,3 +215,5 @@ export { addToFavorites, removefromFavorites, getAllFavorites };
 
 //user order details
 export { orderDetails };
+//coupons
+export { getCoupon ,applyCouponCode};
