@@ -1,9 +1,6 @@
 import express from "express";
 import {
-  addFoodCategory,
-  getAllCategories,
-  updateFoodCategory,
-  deleteFoodCategory,
+  getAllFoodCategories,
   getAllProductItems,
   addProductItem,
   updateProductItem,
@@ -19,12 +16,7 @@ import { uploading } from "../multer/multer.js";
 
 const router = express.Router();
 
-// Restaurant: Add Food Category
-router.get("/add-on-category/get/list", vendorAuthenticate, getAllCategories);
-router.post("/add-on-category/create/", vendorAuthenticate, uploading, addFoodCategory);
-router.put("/add-on-category/update/:categoryId", vendorAuthenticate, uploading, updateFoodCategory);
-router.delete("/add-on-category/delete/:categoryId", vendorAuthenticate, uploading, deleteFoodCategory);
-
+router.get("/add-on-category/get/list" ,vendorAuthenticate , getAllFoodCategories)
 // Restaurant: Menu Item
 router.get("/add-on-item/get/list", vendorAuthenticate,  getAllProductItems );
 router.get("/add-on-item/get/specific-product/:productId",vendorAuthenticate, getSpecificProductItem)

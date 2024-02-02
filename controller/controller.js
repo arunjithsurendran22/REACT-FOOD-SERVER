@@ -37,23 +37,12 @@ import {
 } from "./vendorProfile.controller.js";
 //retaurant image controller
 import {
-  addBanner,
-  updateBanner,
-  deleteBanner,
-  getAllBanners,
-  addBackgroundImage,
-  getBackgroundImage,
-  deleteBackgroundImage,
-  addLogoImage,
-  getLogoImage,
-  deleteLogoImage,
+  addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage
 } from "./vendorImage.controller.js";
 
 //restaurant product -food category and menu-items
 import {
-  getAllCategories,
-  updateFoodCategory,
-  deleteFoodCategory,
+  getAllFoodCategories,
   getAllProductItems,
   getSpecificProductItem,
   addProductItem,
@@ -96,6 +85,7 @@ import {
   userGetAllCategories,
   userGetAllProductItems,
   userGetAllRestaurant,
+  homePageVendorCard,
 } from "./userProduct.controller.js";
 //cart
 import {
@@ -151,9 +141,7 @@ export {
 };
 //restaurant product
 export {
-  getAllCategories,
-  updateFoodCategory,
-  deleteFoodCategory,
+  getAllFoodCategories,
   getAllProductItems,
   getSpecificProductItem,
   addProductItem,
@@ -162,16 +150,7 @@ export {
 };
 //restarant image
 export {
-  addBanner,
-  updateBanner,
-  deleteBanner,
-  getAllBanners,
-  addBackgroundImage,
-  getBackgroundImage,
-  deleteBackgroundImage,
-  addLogoImage,
-  getLogoImage,
-  deleteLogoImage,
+  addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage
 };
 
 //customer profile
@@ -197,7 +176,7 @@ export {
 export { createWorkingHours };
 //---------------------------------------------------
 //exporting all products for users
-export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant };
+export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant ,homePageVendorCard};
 //cart
 export {
   addToCart,

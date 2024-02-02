@@ -1,4 +1,4 @@
-import { userAddressModel, userModel } from "../models/model.js";
+import {  userModel } from "../models/model.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import { hashPassword, comparePassword } from "../helpers/auth.js";
 import jwt from "jsonwebtoken";
@@ -268,69 +268,81 @@ const addUserProfilePhoto = async (req, res, next) => {
 
 //USER ADDRESS MANAGEMENT
 // ----------------------------------------------------------------------------
-
-//POST: add user address endpoint
+// POST: add user address endpoint
 const addUserAddress = async (req, res, next) => {
   try {
     const { street, city, state, landmark, pincode } = req.body;
     const userId = req.userId;
 
-    //check if user is authorized
+    // Check if the user is authorized
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    //check if user exists
+
+    // Check if the user exists
     const existingUser = await userModel.findById(userId);
+
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    const newUserAddress = new userAddressModel({
+
+    // Add the new address to the user's addresses array
+    existingUser.addresses.push({
       street,
       city,
       state,
       landmark,
       pincode,
-      userId: existingUser._id,
     });
-    // Save the new user address document
-    await newUserAddress.save();
+
+    // Save the updated user document
+    await existingUser.save();
+
     return res.status(200).json({
       message: "Address added successfully",
-      user: newUserAddress,
+      user: existingUser,
     });
   } catch (error) {
     next(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // PUT: update user address endpoint
 const updateUserAddress = async (req, res, next) => {
   try {
     const { addressId } = req.params;
     const { street, city, state, landmark, pincode } = req.body;
     const userId = req.userId;
-    //check if user is exists
+
+    // Check if the user exists
     const existingUser = await userModel.findById(userId);
+
     if (!existingUser) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    //check if the address is already exists
-    const existAddress = await userAddressModel.findById(addressId);
-    if (!existAddress) {
+
+    // Check if the address exists in the user's addresses array
+    const existingAddress = existingUser.address.find(
+      (address) => address._id.toString() === addressId
+    );
+
+    if (!existingAddress) {
       return res.status(404).json({ message: "Address not found" });
     }
-    //update the address filed
-    existAddress.street = street;
-    existAddress.city = city;
-    existAddress.state = state;
-    existAddress.landmark = landmark;
-    existAddress.pincode = pincode;
 
-    await existAddress.save();
+    // Update the address fields
+    existingAddress.street = street;
+    existingAddress.city = city;
+    existingAddress.state = state;
+    existingAddress.landmark = landmark;
+    existingAddress.pincode = pincode;
+
+    // Save the updated user document
+    await existingUser.save();
+
     return res.status(200).json({
       message: "Address updated successfully",
-      user: existAddress,
+      user: existingUser,
     });
   } catch (error) {
     next(error);
@@ -354,17 +366,23 @@ const deleteUserAddress = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // find and remove the address by ID
-    const deletedUserAddress = await userAddressModel.findByIdAndDelete(
-      addressId
+    // Find the index of the address in the user's addresses array
+    const addressIndex = existingUser.addresses.findIndex(
+      (address) => address._id.toString() === addressId
     );
 
-    // check if the address was found and deleted
-    if (!deletedUserAddress) {
+    // Check if the address was found in the array
+    if (addressIndex === -1) {
       return res
         .status(404)
         .json({ message: "Address not found or already deleted" });
     }
+
+    // Remove the address from the addresses array
+    existingUser.addresses.splice(addressIndex, 1);
+
+    // Save the updated user document
+    await existingUser.save();
 
     return res.status(200).json({
       message: "Address deleted successfully",
@@ -379,26 +397,31 @@ const deleteUserAddress = async (req, res, next) => {
 const getUserAddresses = async (req, res, next) => {
   try {
     const userId = req.userId;
+
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+
     const existingUser = await userModel.findById(userId);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    //find user address
-    const existAddress = await userAddressModel.find();
+
+    // Extract addresses from the user document
+    const addresses = existingUser.address;
+
     return res.status(200).json({
       message: "Addresses retrieved successfully",
-      existAddress,
+      addresses,
     });
   } catch (error) {
     next(error);
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export {
   userRegister,

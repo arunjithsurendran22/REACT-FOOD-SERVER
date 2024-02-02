@@ -1,10 +1,4 @@
-import {
-  userModel,
-  productModel,
-  cartModel,
-  userAddressModel,
-  orderModel,
-} from "../models/model.js";
+import { userModel, cartModel, orderModel } from "../models/model.js";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import crypto from "crypto";

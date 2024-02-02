@@ -17,6 +17,7 @@ import {
   orderDetails,
   getCoupon,
   applyCouponCode,
+  homePageVendorCard,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -50,4 +51,6 @@ router.get("/order-list/get",userAuthenticate , orderDetails)
 router.get("/coupon-list/get", userAuthenticate, getCoupon)
 router.post("/coupon-list/apply-coupon/:couponId", userAuthenticate, applyCouponCode)
 
+//Home page vendor Card
+router.get("/vendor-card/get" ,homePageVendorCard)
 export default router;

@@ -1,4 +1,4 @@
-import { favoritesModel, productModel, userModel } from "../models/model.js";
+import { favoritesModel, userModel } from "../models/model.js";
 
 // POST: Add product to favorites endpoint
 const addToFavorites = async (req, res, next) => {

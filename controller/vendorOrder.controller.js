@@ -3,8 +3,7 @@ import {
   vendorModel,
   cartModel,
   userModel,
-  userAddressModel,
-  productModel,
+  
 } from "../models/model.js";
 
 // GET: vendor order list

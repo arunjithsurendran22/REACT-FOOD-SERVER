@@ -1,9 +1,4 @@
-import {
-  vendorModel,
-  vendorAddressModel,
-  orderModel,
-  userModel,
-} from "../models/model.js";
+import { vendorModel, orderModel, userModel } from "../models/model.js";
 import { hashPassword, comparePassword } from "../helpers/auth.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -296,12 +291,13 @@ const updateVendorProfile = async (req, res, next) => {
   }
 };
 
-//POST:add vendors address end point
+// POST: add vendors address endpoint
 const addVendorAddress = async (req, res, next) => {
   try {
     const { street, city, state, landmark, pincode } = req.body;
     const vendorId = req.vendorId;
-    //authorization
+
+    // Authorization
     if (!vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -309,22 +305,25 @@ const addVendorAddress = async (req, res, next) => {
     const existingVendor = await vendorModel.findById(vendorId);
 
     if (!existingVendor) {
-      return res.status(404).json({ message: "vendor not found" });
+      return res.status(404).json({ message: "Vendor not found" });
     }
 
-    const vendorAddress = new vendorAddressModel({
+    // Add the address to the vendor model
+    existingVendor.address = {
       street,
       city,
       state,
       landmark,
       pincode,
-      vendorId: vendorId,
-    });
+    };
+    // Save the changes to the database
+    await existingVendor.save();
 
-    await vendorAddress.save();
+    res.status(201).json({ message: "Vendor address added successfully" });
   } catch (error) {
     next(error);
-    console.log(error, "failed to add vendor address");
+    console.error(error, "Failed to add vendor address");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -364,7 +363,6 @@ const vendorCustomers = async (req, res, next) => {
         mobile,
       },
     ];
-    
 
     res.status(200).json({
       message: "UserData fetched successfully",

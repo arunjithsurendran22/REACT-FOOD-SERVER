@@ -1,6 +1,6 @@
-import { vendorAddPincodeModel, vendorModel } from "../models/model.js";
+import { vendorModel } from "../models/model.js";
 
-//POST: Function to add pincode and delivery fee
+// POST: Function to add pincode and delivery fee
 const addPincodeDeliveryFee = async (req, res, next) => {
   try {
     // Extract vendorId, role, pincode, and deliveryFee from request
@@ -14,22 +14,25 @@ const addPincodeDeliveryFee = async (req, res, next) => {
     }
 
     // Check if the vendor exists
-    const existingVendor = await vendorModel.findById(vendorId);
+    const existingVendor = await vendorModel
+      .findById(vendorId)
+      .maxTimeMS(30000);
     if (!existingVendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
     // Create a new pincode and delivery fee entry
-    const newPincodeDeliveryFee = new vendorAddPincodeModel({
+    const newPincodeDeliveryFee = {
       pincode: pincode,
       deliveryFee: deliveryFee,
-      vendorId: vendorId,
-    });
+    };
 
-    // Save the new pincode and delivery fee entry
-    await newPincodeDeliveryFee.save();
+    // Add the new pincode and delivery fee entry to the deliveryArea array
+    existingVendor.deliveryArea.push(newPincodeDeliveryFee);
 
-    // Respond with success message and the new pincode delivery fee entry
+    // Save the updated vendor document
+    await existingVendor.save();
+
     res.status(200).json({
       message: "Successfully added pincode and delivery fee",
       pincodeDeliveryFee: newPincodeDeliveryFee,
@@ -42,27 +45,27 @@ const addPincodeDeliveryFee = async (req, res, next) => {
   }
 };
 
-//GET :get delivery fee and pincode
+// GET: Get delivery fee and pincode
 const getPincodeDeliveryFee = async (req, res, next) => {
   try {
     // Extract vendorId and role from request
     const { vendorId, role } = req;
-  
+
     // Check authorization
     if (role !== "vendor" || !vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Check if the vendor exists
-    const existingVendor = await vendorModel.findById(vendorId);
+    const existingVendor = await vendorModel
+      .findById(vendorId)
+      .maxTimeMS(30000);
     if (!existingVendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    // Get all pincode and delivery fee data for the vendor
-    const pincodeDeliveryFee = await vendorAddPincodeModel.find({
-      vendorId: vendorId,
-    });
+    // Get all pincode and delivery fee data for the vendor from the deliveryArea array
+    const pincodeDeliveryFee = existingVendor.deliveryArea;
 
     // Respond with success message and the pincode delivery fee data
     res.status(200).json({
@@ -77,37 +80,39 @@ const getPincodeDeliveryFee = async (req, res, next) => {
   }
 };
 
-//PUT: Function to edit delivery fee and pincode
+// PUT: Function to edit delivery fee and pincode
 const editPincodeDeliveryFee = async (req, res, next) => {
   try {
-    // Extract vendorId and role from request
     const { vendorId, role } = req;
-    const { pincode, deliveryFee } = req.body;
     const { pincodeId } = req.params;
+    const { deliveryFee } = req.body;
 
     // Check authorization
     if (role !== "vendor" || !vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // Check if the vendor exists
-    const existingVendor = await vendorModel.findById(vendorId);
-    if (!existingVendor) {
-      return res.status(404).json({ message: "Vendor not found" });
+    // Find the vendor and update delivery fee for the specific pincode entry
+    const updatedVendor = await vendorModel.findOneAndUpdate(
+      { _id: vendorId, "deliveryArea._id": pincodeId },
+      { $set: { "deliveryArea.$.deliveryFee": deliveryFee } },
+      { new: true }
+    );
+
+    if (!updatedVendor) {
+      return res
+        .status(404)
+        .json({ message: "Vendor or pincode entry not found" });
     }
 
-    // Create or update pincode and delivery fee entry
-    const updatedPincodeDeliveryFee =
-      await vendorAddPincodeModel.findOneAndUpdate(
-        { vendorId: vendorId, _id: pincodeId },
-        { deliveryFee: deliveryFee },
-        { new: true, upsert: true }
-      );
+    const updatedEntry = updatedVendor.deliveryArea.find(
+      (entry) => entry._id == pincodeId
+    );
 
     // Respond with success message and the updated pincode delivery fee data
     res.status(200).json({
       message: "Successfully edited pincode and delivery fee",
-      pincodeDeliveryFee: updatedPincodeDeliveryFee,
+      pincodeDeliveryFee: updatedEntry,
     });
   } catch (error) {
     // Handle errors
@@ -116,11 +121,9 @@ const editPincodeDeliveryFee = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 // DELETE: Function to delete pincode and delivery fee
 const deletePincodeDeliveryFee = async (req, res, next) => {
   try {
-    // Extract vendorId and role from request
     const { vendorId, role } = req;
     const { pincodeId } = req.params;
 
@@ -130,16 +133,29 @@ const deletePincodeDeliveryFee = async (req, res, next) => {
     }
 
     // Check if the vendor exists
-    const existingVendor = await vendorModel.findById(vendorId);
+    const existingVendor = await vendorModel
+      .findById(vendorId)
+      .maxTimeMS(30000);
     if (!existingVendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    // Find and delete the pincode and delivery fee entry
-    await vendorAddPincodeModel.findByIdAndDelete({
-      _id: pincodeId,
-      vendorId: vendorId,
-    });
+    // Find the index of the delivery area entry to be deleted
+    const deliveryAreaIndex = existingVendor.deliveryArea.findIndex(
+      (entry) => entry._id == pincodeId
+    );
+
+    if (deliveryAreaIndex === -1) {
+      return res
+        .status(404)
+        .json({ message: "Pincode and delivery fee entry not found" });
+    }
+
+    // Remove the specific entry from the deliveryArea array
+    existingVendor.deliveryArea.splice(deliveryAreaIndex, 1);
+
+    // Save the updated vendor document
+    await existingVendor.save();
 
     // Respond with success message
     res.status(200).json({ message: "Successfully deleted" });

@@ -3,24 +3,123 @@ import mongoose from "mongoose";
 const vendorSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
   },
   mobile: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
-    required: true,
   },
   password: {
     type: String,
-    required: true,
   },
   role: {
     type: String,
-    required: true,
   },
+  logoImage: {
+    type: String,
+  },
+  backgroundImage: {
+    type: String,
+  },
+  address: {
+    street: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    state: {
+      type: String,
+    },
+    landmark: {
+      type: String,
+    },
+    pincode: {
+      type: Number,
+    },
+  },
+  deliveryArea: [
+    {
+      pincode: {
+        type: Number,
+      },
+      deliveryFee: {
+        type: Number,
+      },
+    },
+  ],
+  products: [
+    {
+      productTitle: {
+        type: String,
+      },
+      description: {
+        type: String,
+      },
+      price: {
+        type: Number,
+      },
+      image: {
+        type: String,
+      },
+      quantity: {
+        type: Number,
+        default: 1,
+      },
+      category: {
+        type: String,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      inStock: {
+        type: Boolean,
+      },
+      categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "FoodCategory",
+      },
+    },
+  ],
+  workingHours: [
+    {
+      day: {
+        type: String,
+        enum: [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "",
+          null,
+        ],
+      },
+      openingHours: {
+        type: String,
+      },
+      openingState: {
+        type: String,
+        enum: ["AM", "PM", "", null],
+      },
+      closingHours: {
+        type: String,
+      },
+      closingState: {
+        type: String,
+        enum: ["AM", "PM", "", null],
+      },
+      isClosed: {
+        type: Boolean,
+        default: false,
+        status: String,
+      },
+    },
+  ],
 });
 
 const vendorModel = mongoose.model("vendor", vendorSchema);

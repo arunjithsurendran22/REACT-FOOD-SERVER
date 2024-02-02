@@ -1,4 +1,4 @@
-import { adminModel, couponModel } from "../models/model.js";
+import { adminModel } from "../models/model.js";
 
 // POST: add coupon endpoint
 const addCoupon = async (req, res, next) => {
@@ -7,34 +7,35 @@ const addCoupon = async (req, res, next) => {
     const adminId = req.adminId;
     const role = req.role;
 
-    console.log(expireDateTime);
     if (role === "admin" && adminId) {
       try {
         const existingAdmin = await adminModel.findById(adminId);
 
         if (!existingAdmin) {
-          return res.status(404).json({ message: "Vendor not found" });
+          return res.status(404).json({ message: "Admin not found" });
         }
 
         // Check if the coupon already exists with the same title
-        const existingCoupon = await couponModel.findOne({
-          title,
-          adminId,
-        });
+        const existingCoupon = existingAdmin.coupon.find(
+          (coupon) => coupon.title === title
+        );
 
         if (existingCoupon) {
           return res.status(400).json({ message: "Coupon already exists" });
         }
 
         // Create a new Coupon
-        const newCoupon = new couponModel({
+        const newCoupon = {
           title,
           percentage,
-          adminId,
-          expireDateTime: expireDateTime,
-        });
+          expireDateTime: new Date(expireDateTime),
+        };
 
-        await newCoupon.save();
+        existingAdmin.coupon.push(newCoupon);
+
+        // Save the updated admin document
+        await existingAdmin.save();
+
         res.status(201).json(newCoupon);
       } catch (error) {
         console.error("Error in addCoupon:", error);
@@ -63,8 +64,16 @@ const getAllCoupons = async (req, res, next) => {
 
     if (role === "admin") {
       try {
-        // Fetch all coupons for the specific admin
-        const coupons = await couponModel.find({ adminId });
+        // Fetch the admin document
+        const admin = await adminModel.findById(adminId);
+
+        // Check if the admin exists
+        if (!admin) {
+          return res.status(404).json({ message: "Admin not found" });
+        }
+
+        // Extract the coupons array from the admin document
+        const coupons = admin.coupon;
 
         // Check if the admin has any coupons
         if (coupons.length === 0) {
@@ -73,17 +82,8 @@ const getAllCoupons = async (req, res, next) => {
             .json({ message: "No coupons found for this admin" });
         }
 
-        // Check expiration status for each coupon
-        const currentDate = new Date();
-        const couponsWithExpirationStatus = coupons.map((coupon) => {
-          const isExpired = coupon.expireDateTime < currentDate;
-          return {
-            ...coupon._doc,
-            isExpired,
-          };
-        });
-
-        return res.status(200).json(couponsWithExpirationStatus);
+        // Send only the coupons array in the response
+        return res.status(200).json(coupons);
       } catch (error) {
         console.error("Error fetching coupons:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -115,20 +115,26 @@ const updateCoupon = async (req, res, next) => {
           return res.status(404).json({ message: "Admin not found" });
         }
 
-        // Find coupon and update
-        const updatedCoupon = await couponModel.findOneAndUpdate(
-          { _id: couponId, adminId },
-          { title, percentage, expireDateTime },
-          { new: true, runValidators: true }
+        // Find the coupon within the admin's coupon array
+        const couponToUpdate = existingAdmin.coupon.find(
+          (coupon) => coupon._id.toString() === couponId
         );
 
-        if (!updatedCoupon) {
+        if (!couponToUpdate) {
           return res
             .status(404)
             .json({ message: "Coupon not found or not authorized" });
         }
 
-        return res.status(200).json(updatedCoupon);
+        // Update the coupon properties
+        couponToUpdate.title = title;
+        couponToUpdate.percentage = percentage;
+        couponToUpdate.expireDateTime = expireDateTime;
+
+        // Save the changes to the admin document
+        await existingAdmin.save();
+
+        return res.status(200).json(couponToUpdate);
       } catch (error) {
         console.error("Error updating coupon:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -151,21 +157,31 @@ const deleteCoupon = async (req, res, next) => {
     const couponId = req.params.couponId;
 
     if (role === "admin" && adminId) {
-      //check if admin already exists
-      const existingAdmin = await adminModel.findById(adminId);
+      try {
+        // Check if admin already exists
+        const existingAdmin = await adminModel.findById(adminId);
 
-      if (!existingAdmin) {
-        return res.status(404).json({ message: "Admin not found" });
+        if (!existingAdmin) {
+          return res.status(404).json({ message: "Admin not found" });
+        }
+        // Find the index of the coupon within the admin's coupon array
+        const couponIndex = existingAdmin.coupon.findIndex(
+          (coupon) => coupon._id.toString() === couponId
+        );
+
+        if (couponIndex === -1) {
+          return res.status(404).json({ message: "Coupon not found" });
+        }
+        // Remove the coupon from the admin's coupon array
+        existingAdmin.coupon.splice(couponIndex, 1);
+        // Save the changes to the admin document
+        await existingAdmin.save();
+
+        return res.status(200).json({ message: "Successfully deleted" });
+      } catch (error) {
+        console.error("Error deleting coupon:", error);
+        return res.status(500).json({ message: "Internal server error" });
       }
-
-      //find and delete coupon
-      const existingCoupon = await couponModel.findByIdAndDelete(couponId);
-
-      if (!existingCoupon) {
-        return res.status(404).json({ message: "Coupon not found" });
-      }
-
-      return res.status(200).json({ message: "Successfully deleted" });
     } else {
       return res.status(401).json({ message: "Unauthorized" });
     }

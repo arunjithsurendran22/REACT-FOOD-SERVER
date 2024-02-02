@@ -1,217 +1,108 @@
 import cloudinary from "../cloudinary/cloudinary.js";
-import {
-  vendorModel,
-  foodCategoryModel,
-  productModel,
-} from "../models/model.js";
+import { vendorModel, adminModel } from "../models/model.js";
 
-// POST: add food endpoint
-const addFoodCategory = async (req, res, next) => {
+// GET: Get all food categories
+const getAllFoodCategories = async (req, res, next) => {
   try {
-    const { title, description } = req.body;
-    // Check if the user is authenticated
     const vendorId = req.vendorId;
     const role = req.role;
 
-    if (!vendorId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    if (role === "vendor") {
+    if (role === "vendor" && vendorId) {
+      // Check if the user is authenticated
       const existingVendor = await vendorModel.findById(vendorId);
 
       if (!existingVendor) {
         return res.status(404).json({ message: "Vendor not found" });
       }
-      // Upload image to Cloudinary
-      const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
-      // Create a new food category associated with the vendor
-      const newFoodCategory = new foodCategoryModel({
-        title,
-        description,
-        image: secure_url,
-        vendorId: vendorId,
-      });
 
-      await newFoodCategory.save();
+      const adminDocument = await adminModel.findOne({ role: "admin" });
 
-      res.status(201).json({
-        message: "Food category added successfully",
-        category: newFoodCategory,
-      });
-    } else {
-      return res.status(404).json({ message: "vendor not found" });
-    }
-  } catch (error) {
-    next(error);
-    console.error("Error in addFoodCategory:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// GET: Get all food categories
-const getAllCategories = async (req, res, next) => {
-  try {
-    const vendorId = req.vendorId;
-    const role = req.role;
-
-    if (role === "vendor") {
-      const existingVendor = await vendorModel.findById(vendorId);
-
-      if (!existingVendor) {
-        return res.status(404).json({ message: "Vendor not Found" });
+      if (!adminDocument) {
+        return res.status(404).json({ message: "Admin not found" });
       }
-      // Fetch all food categories from the database
-      const categories = await foodCategoryModel.find();
-      res
-        .status(200)
-        .json({ message: "Category Successfully fetch", categories });
-    } else {
-      console.log("vendor not found");
-    }
-  } catch (error) {
-    next(error);
-    console.error("Error in getFoodCategories:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
 
-// UPDATE: Update a category
-const updateFoodCategory = async (req, res, next) => {
-  try {
-    const { categoryId } = req.params;
-    const { title, description } = req.body;
-    const vendorId = req.vendorId;
-    const role = req.role;
-    if (role === "vendor") {
-      // Check if the user is authenticated
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      // Check if the category exists
-      const existingCategory = await foodCategoryModel.findOne({
-        _id: categoryId,
-        vendorId: vendorId,
-      });
-
-      if (!existingCategory) {
-        return res.status(404).json({ message: "Category not found" });
-      }
-      // Update the category details
-      existingCategory.title = title;
-      existingCategory.description = description;
-      // Check if there is a new image to upload
-      if (req.file) {
-        // Upload new image to Cloudinary
-        const { secure_url } = await cloudinary.v2.uploader.upload(
-          req.file.path
-        );
-        existingCategory.image = secure_url;
-      }
-      // Save the updated category
-      await existingCategory.save();
+      // Extract food categories from the admin document
+      const foodCategories = adminDocument.foodCategory;
 
       res.status(200).json({
-        message: "Food category updated successfully",
-        category: existingCategory,
+        message: "Successfully fetched all food categories",
+        foodCategories,
       });
     } else {
-      return res.status(404).json({ message: "vendor not found" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized or Vendor Role mismatch" });
     }
   } catch (error) {
     next(error);
-    console.error("Error in updateFoodCategory:", error);
+    console.error("Error in getAllFoodCategories:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// DELETE: Delete a category
-const deleteFoodCategory = async (req, res, next) => {
-  try {
-    const { categoryId } = req.params;
-    const vendorId = req.vendorId;
-    const role = req.role;
-    // Check if the user is authenticated
-    if (role === "vendor") {
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      // Check if the category exists and belongs to the user
-      const existingCategory = await foodCategoryModel.findOneAndDelete({
-        _id: categoryId,
-        vendorId: vendorId,
-      });
-
-      if (!existingCategory) {
-        return res.status(404).json({ message: "Category not found" });
-      }
-
-      res.status(200).json({
-        message: "Food category deleted successfully",
-        category: existingCategory,
-      });
-    } else {
-      return res.status(404).json({ message: "vendor not found" });
-    }
-  } catch (error) {
-    next(error);
-    console.error("Error in deleteFoodCategory:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// POST: add product item endpoint
+/// POST: add product item endpoint
 const addProductItem = async (req, res, next) => {
   try {
     const { productTitle, description, price, quantity } = req.body;
     const vendorId = req.vendorId;
     const { categoryId } = req.params;
-
     const role = req.role;
-    if (role === "vendor") {
-      // Check if the user is authenticated
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
 
+    if (role === "vendor" && vendorId) {
+      // Check if the user is authenticated
       const existingVendor = await vendorModel.findById(vendorId);
+
       if (!existingVendor) {
         return res.status(404).json({ message: "Vendor not found" });
       }
 
-      // Check if selected category exists
-      const selectedCategory = await foodCategoryModel.findById(categoryId);
-      if (!selectedCategory) {
-        return res.status(404).json({ message: "Selected category not found" });
+      const adminDocument = await adminModel.findOne();
+      
+      if (!adminDocument) {
+        return res.status(404).json({ message: "Admin not found" });
       }
 
-      const { title } = selectedCategory;
+      const foodCategories = adminDocument.foodCategory;
 
-      const category = title;
+      const selectedCategory = foodCategories.find(
+        (item) => categoryId === item._id.toString()
+      );
+
+      if (!selectedCategory) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+
+      const categoryTitle = selectedCategory.title;
 
       // Upload image to Cloudinary
       const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
 
-      // Create a new product item associated with the user, category, and quantity
-      const newProductItem = new productModel({
+      // Create a new product item
+      const newProductItem = {
         productTitle,
         description,
         price,
         quantity,
-        category,
+        category: categoryTitle,
         image: secure_url,
         categoryId: categoryId,
-        vendorId: vendorId,
-        inStock: true, 
-      });
+        inStock: true,
+      };
 
-      await newProductItem.save();
+      // Add the new product item to the vendor's products array
+      existingVendor.products.push(newProductItem);
+
+      // Save the updated vendor document
+      await existingVendor.save();
 
       res.status(201).json({
         message: "Product item added successfully",
         newProductItem: newProductItem,
       });
     } else {
-      return res.status(404).json({ message: "Vendor Role mismatch" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized or Vendor Role mismatch" });
     }
   } catch (error) {
     next(error);
@@ -220,6 +111,7 @@ const addProductItem = async (req, res, next) => {
   }
 };
 
+
 // GET: All product items
 const getAllProductItems = async (req, res, next) => {
   try {
@@ -227,7 +119,7 @@ const getAllProductItems = async (req, res, next) => {
     const role = req.role;
 
     //Unauthorized
-    if (!vendorId) {
+    if (role === "vendor" && !vendorId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -237,15 +129,10 @@ const getAllProductItems = async (req, res, next) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    if (role === "vendor" && vendorId) {
-      const productItems = await productModel.find({
-        vendorId: vendorId,
-      });
-      
-      res.status(200).json(productItems);
-    } else {
-      return res.status(404).json({ message: "Vendor Role mismatch" });
-    }
+    const productItems = existingVendor.products;
+    res
+      .status(200)
+      .json({ message: "Successfully get products", productItems });
   } catch (error) {
     next(error);
     console.error("Error fetching product items:", error);
@@ -253,99 +140,88 @@ const getAllProductItems = async (req, res, next) => {
   }
 };
 
-//GET :get specific items for when need to update
+// GET: Get specific product item for update
 const getSpecificProductItem = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const vendorId = req.vendorId;
-    const role = req.role;
 
-    if (role === "vendor") {
-      //Unauthorized
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      //check if vendor is already exists
-      const existingVendor = await vendorModel.findById(vendorId);
-      if (!existingVendor) {
-        return res.status(404).json({ message: "Vendor not found" });
-      }
-
-      //Find the product item
-      const specificProduct = await productModel.findOne({
-        _id: productId,
-        vendorId: vendorId,
-      });
-
-      res
-        .status(200)
-        .json({
-          message: "Successfully fetched specific productItem",
-          specificProduct,
-        });
-    } else {
-      return res.status(404).json({ message: "Vendor not found" });
+    // Check if the user is authenticated and vendor exists
+    const existingVendor = await vendorModel.findById(vendorId);
+    if (!existingVendor) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized or Vendor not found" });
     }
+
+    // Find the product item within the vendor's products array
+    const specificProduct = existingVendor.products.find(
+      (product) =>
+        product._id.toString() === productId &&
+        product.vendorId.toString() === vendorId
+    );
+
+    if (!specificProduct) {
+      return res.status(404).json({ message: "Product item not found" });
+    }
+
+    res.status(200).json({
+      message: "Successfully fetched specific product item",
+      specificProduct,
+    });
   } catch (error) {
-    next(error)
-    console.error("Failed to fetch specific product item");
+    next(error);
+    console.error("Failed to fetch specific product item:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// UPDATE: Product items
+/// UPDATE: Product item
 const updateProductItem = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const { productTitle, description, price, quantity } = req.body;
     const vendorId = req.vendorId;
-    const role = req.role;
 
-    if (role === "vendor") {
-      // Check if the user is authenticated
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const existingVendor = await vendorModel.findById(vendorId);
-      if (!existingVendor) {
-        return res.status(404).json({ message: "Vendor not found" });
-      }
-
-      // Check if the product item exists and belongs to the user
-      const existingProductItem = await productModel.findOne({
-        _id: productId,
-        vendorId: vendorId,
-      });
-
-      if (!existingProductItem) {
-        return res.status(404).json({ message: "Product item not found" });
-      }
-
-      // Update the product item details
-      existingProductItem.productTitle = productTitle;
-      existingProductItem.description = description;
-      existingProductItem.price = price;
-      existingProductItem.quantity = quantity;
-
-      // Check if there is a new image to upload
-      if (req.file) {
-        // Upload new image to Cloudinary
-        const { secure_url } = await cloudinary.v2.uploader.upload(
-          req.file.path
-        );
-        existingProductItem.image = secure_url;
-      }
-
-      // Save the updated product item
-      await existingProductItem.save();
-
-      res.status(200).json({
-        message: "Product item updated successfully",
-        productItem: existingProductItem,
-      });
-    } else {
-      return res.status(404).json({ message: "Vendor Role mismatch" });
+    // Check if the user is authenticated and vendor exists
+    const existingVendor = await vendorModel.findById(vendorId);
+    if (!existingVendor) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized or Vendor not found" });
     }
+
+    // Find the product item within the vendor's products array
+    const existingProductItem = existingVendor.products.find(
+      (product) =>
+        product._id.toString() === productId &&
+        product.vendorId.toString() === vendorId
+    );
+
+    if (!existingProductItem) {
+      return res.status(404).json({ message: "Product item not found" });
+    }
+
+    // Update the product item details
+    existingProductItem.productTitle = productTitle;
+    existingProductItem.description = description;
+    existingProductItem.price = price;
+    existingProductItem.quantity = quantity;
+
+    // Check if there is a new image to upload
+    if (req.file) {
+      // Upload new image to Cloudinary
+      const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
+      existingProductItem.image = secure_url;
+    }
+
+    // Save the updated vendor document
+    await existingVendor.save();
+
+    res.status(200).json({
+      message: "Product item updated successfully",
+      productItem: existingProductItem,
+    });
   } catch (error) {
     next(error);
     console.error("Error in updateProductItem:", error);
@@ -358,32 +234,36 @@ const deleteProductItem = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const vendorId = req.vendorId;
-    const role = req.role;
 
-    if (role === "vendor") {
-      // Check if the user is authenticated
-      if (!vendorId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const existingVendor = await vendorModel.findById(vendorId);
-      if (!existingVendor) {
-        return res.status(404).json({ message: "Vendor not found" });
-      }
-      // Check if the product item exists and belongs to the user
-      const existingProductItem = await productModel.findOneAndDelete({
-        _id: productId,
-        vendorId: vendorId,
-      });
-      if (!existingProductItem) {
-        return res.status(404).json({ message: "Product item not found" });
-      }
-      res.status(200).json({
-        message: "Product item deleted successfully",
-        productItem: existingProductItem,
-      });
-    } else {
-      return res.status(404).json({ message: "Vendor Role mismatch" });
+    // Check if the user is authenticated and vendor exists
+    const existingVendor = await vendorModel.findById(vendorId);
+    if (!existingVendor) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized or Vendor not found" });
     }
+
+    // Find the product item within the vendor's products array
+    const existingProductItem = existingVendor.products.find(
+      (product) => product._id.toString() === productId
+    );
+
+    if (!existingProductItem) {
+      return res.status(404).json({ message: "Product item not found" });
+    }
+
+    // Remove the product item from the products array
+    const existingProductItemIndex =
+      existingVendor.products.indexOf(existingProductItem);
+    existingVendor.products.splice(existingProductItemIndex, 1);
+
+    // Save the updated vendor document
+    await existingVendor.save();
+
+    res.status(200).json({
+      message: "Product item deleted successfully",
+      productItem: existingProductItem,
+    });
   } catch (error) {
     next(error);
     console.error("Error in deleteProductItem:", error);
@@ -392,10 +272,7 @@ const deleteProductItem = async (req, res, next) => {
 };
 
 export {
-  getAllCategories,
-  addFoodCategory,
-  updateFoodCategory,
-  deleteFoodCategory,
+  getAllFoodCategories,
   getAllProductItems,
   getSpecificProductItem,
   addProductItem,

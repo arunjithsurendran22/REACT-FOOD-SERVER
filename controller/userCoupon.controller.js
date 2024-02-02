@@ -1,4 +1,4 @@
-import { couponModel, userModel, cartModel } from "../models/model.js";
+import {  userModel, cartModel } from "../models/model.js";
 
 //GET :get coupon codes
 const getCoupon = async (req, res, next) => {
