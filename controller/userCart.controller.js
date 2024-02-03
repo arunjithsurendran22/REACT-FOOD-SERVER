@@ -1,9 +1,8 @@
-import { userModel, vendorModel, orderModel } from "../models/model.js";
+import { userModel, vendorModel } from "../models/model.js";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { log } from "console";
-
 
 dotenv.config();
 
@@ -51,7 +50,7 @@ const addToCart = async (req, res, next) => {
     if (!cartItem) {
       // If the user doesn't have a cartItem, create a new one
       cartItem = {
-        couponCode: "", 
+        couponCode: "",
         products: [],
         grandTotal: 0,
       };
@@ -69,7 +68,8 @@ const addToCart = async (req, res, next) => {
     if (existingProduct) {
       // If the product already exists, increase the quantity
       existingProduct.quantity += 1;
-      existingProduct.totalPrice = existingProduct.quantity * existingProduct.price;
+      existingProduct.totalPrice =
+        existingProduct.quantity * existingProduct.price;
     } else {
       // If the product doesn't exist, add a new product to the cart
       const newProduct = {
@@ -93,16 +93,17 @@ const addToCart = async (req, res, next) => {
 
     // Save the updated user model
     await existingUser.save();
-    
+
     console.log("Product added to cart successfully");
-    res.status(200).json({ message: "Product added to cart successfully", existingUser });
+    res
+      .status(200)
+      .json({ message: "Product added to cart successfully", existingUser });
   } catch (error) {
     console.error(error);
     next(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 // PUT: Edit quantity of product item endpoint
 const updateQuantity = async (req, res, next) => {
@@ -267,35 +268,30 @@ const selectAddressAddToCart = async (req, res, next) => {
     //check if user is authenticated
     const userId = req.userId;
     const { addressId } = req.params;
+    console.log(addressId);
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Find the selected address from the address model
-    const selectedAddress = await userModel.findById(addressId);
+    const existingUser = await userModel.findById(userId);
 
-    if (!selectedAddress) {
-      return res
-        .status(404)
-        .json({ message: "Address not found for the user" });
+    if (!existingUser) {
+      return res.status(404).json({ message: "user not found" });
     }
 
-    // Create a cart item with the selected address
-    const cartItem = new cartModel({
-      street: selectedAddress.street,
-      city: selectedAddress.city,
-      state: selectedAddress.state,
-      landmark: selectedAddress.landmark,
-      pincode: selectedAddress.pincode,
-    });
+    const userAddress = existingUser.address;
 
-    // Save the cart item to the database
-    await cartItem.save();
+    const existingAddress = userAddress.find(
+      (item) => item._id.toString() === addressId.toString()
+    );
+
+    console.log(existingAddress);
 
     return res
       .status(200)
-      .json({ message: "Address added to cart successfully", cartItem });
+      .json({ message: "Address added to cart successfully", existingAddress });
   } catch (error) {
     next(error);
     console.error(error);
@@ -360,68 +356,48 @@ const validatePayment = async (req, res, next) => {
 };
 
 //POST: payment details will save to database
+// POST: Save payment details to the database
 const order = async (req, res, next) => {
   try {
-    const { orderId, paymentId, cartId, userId, addressId, vendorId, total } =
+    const { orderId, paymentId, userId, addressId, cartItem, totalToPay } =
       req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
+    // Step 1: Retrieve User and Address
     const existingUser = await userModel.findById(userId);
-
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch all details from the user
-    const userDetails = await userModel.findById(userId);
-    // Fetch user details from the userModel
-    const userAddress = await userAddressModel.findById(addressId);
-    // Fetch cart items from the cart model
-    const cartData = await cartModel.findById(cartId).lean();
-    const cartItems = cartData ? cartData.products : [];
+    // Assuming addressId is the index of the address in the user's addresses array
+    const address = existingUser.address[addressId];
 
-    // Create an array to store the structured cart items
-    const formattedCartItems = [];
+    // Step 2: Create Order Object
+    const orderDetails = {
+      orderId: orderId,
+      paymentId: paymentId,
+      userId: userId,
+      address: address,
+      products: cartItem.map(item => ({
+        productId: item.productId,
+        vendorId: item.vendorId,
+        productTitle: item.productTitle,
+        price: item.price,
+        image: item.image,
+        quantity: item.quantity,
+        totalPrice: item.totalPrice,
+      })),
+      totalAmount: totalToPay, 
+    };
+    // Step 3: Save Order to User
+    existingUser.orders.push(orderDetails);
 
-    // Iterate through each product in the cartItems array
-    for (const product of cartItems) {
-      formattedCartItems.push({
-        productId: product.productId,
-        vendorId: product.vendorId,
-        productTitle: product.productTitle,
-        price: product.price,
-        image: product.image,
-        quantity: product.quantity,
-        totalPrice: product.totalPrice,
-        _id: product._id,
-      });
-    }
-
-    // Create the order details object
-    const orderDetails = new orderModel({
-      orderId,
-      paymentId,
-      vendorId,
-      userId,
-      total,
-      name: userDetails.name,
-      email: userDetails.email,
-      mobile: userDetails.mobile,
-      address: {
-        street: userAddress.street,
-        city: userAddress.city,
-        state: userAddress.state,
-        landmark: userAddress.landmark,
-        pincode: userAddress.pincode,
-      },
-      cartItems: formattedCartItems,
-    });
-
-    await orderDetails.save();
-
+    existingUser.totalAmount = totalToPay;
+    // Step 4: Save Changes to Database
+    await existingUser.save();
     res
       .status(200)
       .json({ message: "Successfully saved Order Details", orderDetails });
@@ -430,6 +406,8 @@ const order = async (req, res, next) => {
     console.error("Failed to save to the database");
   }
 };
+
+
 
 export {
   addToCart,

@@ -1,4 +1,4 @@
-import { orderModel, vendorModel } from "../models/model.js";
+import { vendorModel } from "../models/model.js";
 
 //GET: get vendor customers count
 const getCustomerCount = async (req, res, next) => {

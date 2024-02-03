@@ -1,4 +1,4 @@
-import { adminModel, orderModel, userModel } from "../models/model.js";
+import { adminModel, userModel } from "../models/model.js";
 
 const dashboardStatus = async (req, res, next) => {
   try {

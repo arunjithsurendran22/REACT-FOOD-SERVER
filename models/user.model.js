@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   mobile: {
-    type: Number,
+    type: String,
   },
   email: {
     type: String,
@@ -73,11 +73,81 @@ const userSchema = new mongoose.Schema({
       grandTotal: {
         type: Number,
         default: function () {
-          return this.cartItems[0].products.reduce(
+          return this.products.reduce(
             (total, product) => total + product.totalPrice,
             0
           );
         },
+      },
+    },
+  ],
+  orders: [
+    {
+      orderId: {
+        type: String,
+      },
+      paymentId: {
+        type: String,
+      },
+      userId: {
+        type: String,
+      },
+      address: {
+        street: {
+          type: String,
+        },
+        city: {
+          type: String,
+        },
+        state: {
+          type: String,
+        },
+        landmark: {
+          type: String,
+        },
+        pincode: {
+          type: Number,
+        },
+      },
+      products: [
+        {
+          productId: {
+            type: String,
+          },
+          vendorId: {
+            type: String,
+          },
+          productTitle: {
+            type: String,
+          },
+          price: {
+            type: Number,
+          },
+          image: {
+            type: String,
+          },
+          quantity: {
+            type: Number,
+            default: 1,
+          },
+          totalPrice: {
+            type: Number,
+            default: function () {
+              return this.quantity * this.price;
+            },
+          },
+        },
+      ],
+      totalAmount: {
+        type: Number,
+      },
+      status: {
+        type: String,
+        default: "pending",
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
       },
     },
   ],

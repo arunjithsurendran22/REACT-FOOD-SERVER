@@ -1,4 +1,4 @@
-import { vendorModel, orderModel, userModel } from "../models/model.js";
+import { vendorModel, userModel } from "../models/model.js";
 import { hashPassword, comparePassword } from "../helpers/auth.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";

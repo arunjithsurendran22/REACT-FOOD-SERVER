@@ -1,4 +1,4 @@
-import { userModel, orderModel } from "../models/model.js";
+import { userModel } from "../models/model.js";
 
 //GET :user order list
 const orderDetails = async (req, res, next) => {
