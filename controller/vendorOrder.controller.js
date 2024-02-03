@@ -1,7 +1,6 @@
 import {
   orderModel,
   vendorModel,
-  cartModel,
   userModel,
   
 } from "../models/model.js";

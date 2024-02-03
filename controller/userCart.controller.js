@@ -1,17 +1,18 @@
-import { userModel, cartModel, orderModel } from "../models/model.js";
+import { userModel, vendorModel, orderModel } from "../models/model.js";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { log } from "console";
+
 
 dotenv.config();
 
 const keyId = process.env.RAZOR_PAY_KEY_ID;
 const secretKey = process.env.RAZOR_PAY_SECRET_KEY;
-
-// POST: Add product to cart
+//POST: add to cart
 const addToCart = async (req, res, next) => {
   try {
-    const { productId } = req.params;
+    const { productId, vendorId } = req.params;
     const userId = req.userId;
 
     // Check if user is authenticated
@@ -25,82 +26,83 @@ const addToCart = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const product = await productModel.findById(productId);
-
-    if (!product) {
-      return res.status(400).json({ message: "Product not found" });
+    // Fetch products from the database vendor model
+    const vendorProduct = await vendorModel.findById(vendorId);
+    if (!vendorProduct) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    // Check if the product is already in the user's cart
-    const existingCartItem = await cartModel.findOne({
-      userId,
-      "products.productId": productId,
-    });
+    // Get the products array from the vendorProduct
+    const productItem = vendorProduct.products;
 
-    // Check if the product has the same vendorId as the existing items in the cart
-    if (existingCartItem) {
-      const isSameVendor =
-        existingCartItem.products &&
-        existingCartItem.products.every(
-          (cartProduct) =>
-            cartProduct.vendorId.toString() === product.vendorId.toString()
-        );
+    // Find the matching product based on both _id and productId
+    const matchingProduct = productItem.find(
+      (item) => item._id.toString() === productId.toString()
+    );
 
-      if (!isSameVendor) {
-        return res.status(400).json({
-          message:
-            "Cannot add products from different vendors to the same cart",
-        });
-      }
+    if (!matchingProduct) {
+      console.log("Product not found with the given productId and vendorId.");
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-      // If the product already exists in the cart, increase quantity and update total price
-      if (existingCartItem.products && existingCartItem.products.length > 0) {
-        await cartModel.findOneAndUpdate(
-          {
-            userId,
-            "products.productId": product._id,
-          },
-          {
-            $inc: { "products.$.quantity": 1 },
-            $set: {
-              "products.$.totalPrice":
-                product.price * (existingCartItem.products[0].quantity + 1),
-              grandTotal: existingCartItem.grandTotal + product.price,
-            },
-          }
-        );
-      }
+    // Check if the user already has a cartItem
+    let cartItem = existingUser.cartItems[0];
+
+    if (!cartItem) {
+      // If the user doesn't have a cartItem, create a new one
+      cartItem = {
+        couponCode: "", 
+        products: [],
+        grandTotal: 0,
+      };
+
+      existingUser.cartItems.push(cartItem);
+    }
+
+    // Check if the product already exists in the cartItem
+    const existingProduct = cartItem.products.find(
+      (product) =>
+        product.productId.toString() === productId.toString() &&
+        product.vendorId.toString() === vendorId.toString()
+    );
+
+    if (existingProduct) {
+      // If the product already exists, increase the quantity
+      existingProduct.quantity += 1;
+      existingProduct.totalPrice = existingProduct.quantity * existingProduct.price;
     } else {
-      // If the product is not in the cart, add it
-      await cartModel.findOneAndUpdate(
-        { userId },
-        {
-          $push: {
-            products: {
-              productId: product._id,
-              vendorId: product.vendorId,
-              productTitle: product.productTitle,
-              price: product.price,
-              image: product.image,
-              quantity: 1,
-              totalPrice: product.price,
-            },
-          },
-          $inc: { grandTotal: product.price },
-        },
-        { upsert: true }
-      );
+      // If the product doesn't exist, add a new product to the cart
+      const newProduct = {
+        productId: productId,
+        vendorId: vendorId,
+        productTitle: matchingProduct.productTitle,
+        price: matchingProduct.price,
+        image: matchingProduct.image,
+        quantity: 1,
+        totalPrice: matchingProduct.price, // Initial total price
+      };
+
+      cartItem.products.push(newProduct);
     }
 
-    return res
-      .status(200)
-      .json({ message: "Product added to cart successfully" });
+    // Update the grandTotal in the cartItem
+    cartItem.grandTotal = cartItem.products.reduce(
+      (total, product) => total + product.totalPrice,
+      0
+    );
+
+    // Save the updated user model
+    await existingUser.save();
+    
+    console.log("Product added to cart successfully");
+    res.status(200).json({ message: "Product added to cart successfully", existingUser });
   } catch (error) {
     console.error(error);
     next(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 // PUT: Edit quantity of product item endpoint
 const updateQuantity = async (req, res, next) => {
@@ -121,22 +123,21 @@ const updateQuantity = async (req, res, next) => {
     }
 
     // Find the cart item and update the quantity
-    const cartItem = await cartModel.findOneAndUpdate(
-      { userId, "products._id": Id },
-      { $set: { "products.$.quantity": quantity } },
-      { new: true }
+    const cartItem = existingUser.cartItems.find((item) =>
+      item.products.some((product) => product._id.toString() === Id)
     );
-
     if (!cartItem) {
       return res.status(404).json({ message: "Product not found in the cart" });
     }
 
-    // Recalculate the total price for each product in the cart
-    cartItem.products.forEach((product) => {
-      product.totalPrice = product.price * product.quantity;
-    });
+    // Update the quantity of the product
+    const productToUpdate = cartItem.products.find(
+      (product) => product._id.toString() === Id
+    );
+    productToUpdate.quantity = quantity;
+    productToUpdate.totalPrice = quantity * productToUpdate.price;
 
-    // Calculate the total price and grand total
+    // Recalculate the total price for each product in the cart
     const total = cartItem.products.reduce(
       (acc, item) => acc + item.totalPrice,
       0
@@ -145,8 +146,8 @@ const updateQuantity = async (req, res, next) => {
     // Update the grand total in the cart
     cartItem.grandTotal = total;
 
-    // Save the updated cart
-    await cartItem.save();
+    // Save the updated user model
+    await existingUser.save();
 
     res
       .status(200)
@@ -163,52 +164,59 @@ const removeCartItem = async (req, res, next) => {
   try {
     const userId = req.userId;
     const { Id } = req.params;
-
-    // Check if user is authenticated
+    // If the user is not authenticated
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
-    // Find user
+    // Find the user
     const existingUser = await userModel.findById(userId);
-
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
     // Find the cart item and remove the specified product
-    const cartItem = await cartModel.findOneAndUpdate(
-      { userId },
-      { $pull: { products: { _id: Id } } },
-      { new: true }
+    const cartItemIndex = existingUser.cartItems.findIndex((item) =>
+      item.products.some((product) => product._id.toString() === Id)
     );
 
-    // If the cart item is not found
-    if (!cartItem) {
-      return res.status(404).json({ message: "Cart not found for the user" });
+    if (cartItemIndex === -1) {
+      return res.status(404).json({ message: "Product not found in the cart" });
     }
 
+    const removedProduct = existingUser.cartItems[cartItemIndex].products.find(
+      (product) => product._id.toString() === Id
+    );
+
+    // Update the grand total in the cart before removing the product
+    const totalBeforeRemove = existingUser.cartItems[
+      cartItemIndex
+    ].products.reduce((acc, item) => acc + item.totalPrice, 0);
+
+    // Remove the specified product from the cart item
+    existingUser.cartItems[cartItemIndex].products = existingUser.cartItems[
+      cartItemIndex
+    ].products.filter((product) => product._id.toString() !== Id);
+
     // Recalculate the total price for each product in the cart
-    cartItem.products.forEach((product) => {
+    existingUser.cartItems[cartItemIndex].products.forEach((product) => {
       product.totalPrice = product.price * product.quantity;
     });
 
-    // Calculate the total price and grand total
-    const total = cartItem.products.reduce(
-      (acc, item) => acc + item.totalPrice,
-      0
-    );
+    // Calculate the total price and grand total after removing the product
+    const totalAfterRemove = existingUser.cartItems[
+      cartItemIndex
+    ].products.reduce((acc, item) => acc + item.totalPrice, 0);
 
     // Update the grand total in the cart
-    cartItem.grandTotal = total;
+    existingUser.cartItems[cartItemIndex].grandTotal = totalAfterRemove;
 
-    // Save the updated cart
-    await cartItem.save();
+    // Save the updated user model
+    await existingUser.save();
 
     res.status(200).json({
       message: "Product removed from cart successfully",
-      cartItem,
-      total,
+      removedProduct,
+      totalBeforeRemove,
+      totalAfterRemove,
     });
   } catch (error) {
     next(error);
@@ -227,13 +235,19 @@ const viewCart = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // Find the user and their cart
+    // Find the user
     const user = await userModel.findById(userId);
-    const cartItem = await cartModel.findOne({ userId });
-
-    if (!user || !cartItem) {
-      return res.status(404).json({ message: "User or cart not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
+
+    // Check if the user has cartItems
+    if (!user.cartItems || user.cartItems.length === 0) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Retrieve the cart details from the user model
+    const cartItem = user.cartItems[0];
 
     res.status(200).json({
       message: "Cart retrieved successfully",
@@ -241,8 +255,8 @@ const viewCart = async (req, res, next) => {
       grandTotal: cartItem.grandTotal,
     });
   } catch (error) {
-    next(error);
     console.error(error);
+    next(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -259,7 +273,7 @@ const selectAddressAddToCart = async (req, res, next) => {
     }
 
     // Find the selected address from the address model
-    const selectedAddress = await userAddressModel.findById(addressId);
+    const selectedAddress = await userModel.findById(addressId);
 
     if (!selectedAddress) {
       return res

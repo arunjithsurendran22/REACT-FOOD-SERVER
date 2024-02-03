@@ -3,19 +3,15 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
   },
   mobile: {
     type: Number,
-    required: true,
   },
   email: {
     type: String,
-    required: true,
   },
   password: {
     type: String,
-    required: true,
   },
   image: {
     type: String,
@@ -24,27 +20,22 @@ const userSchema = new mongoose.Schema({
     {
       street: {
         type: String,
-        required: true,
       },
       city: {
         type: String,
-        required: true,
       },
       state: {
         type: String,
-        required: true,
       },
       landmark: {
         type: String,
-        required: true,
       },
       pincode: {
         type: Number,
-        required: true,
       },
     },
   ],
-  cartItems:[
+  cartItems: [
     {
       couponCode: {
         type: String,
@@ -52,9 +43,7 @@ const userSchema = new mongoose.Schema({
       products: [
         {
           productId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "products",
-            required: true,
+            type: String,
           },
           vendorId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -62,15 +51,12 @@ const userSchema = new mongoose.Schema({
           },
           productTitle: {
             type: String,
-            required: true,
           },
           price: {
             type: Number,
-            required: true,
           },
           image: {
             type: String,
-            required: true,
           },
           quantity: {
             type: Number,
@@ -86,10 +72,15 @@ const userSchema = new mongoose.Schema({
       ],
       grandTotal: {
         type: Number,
-        default: 0,
+        default: function () {
+          return this.cartItems[0].products.reduce(
+            (total, product) => total + product.totalPrice,
+            0
+          );
+        },
       },
-    }
-  ]
+    },
+  ],
 });
 
 const userModel = mongoose.model("user", userSchema);

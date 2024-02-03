@@ -37,7 +37,10 @@ import {
 } from "./vendorProfile.controller.js";
 //retaurant image controller
 import {
-  addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage
+  addBackgroundImage,
+  getBackgroundImage,
+  addLogoImage,
+  getLogoImage,
 } from "./vendorImage.controller.js";
 
 //restaurant product -food category and menu-items
@@ -86,6 +89,7 @@ import {
   userGetAllProductItems,
   userGetAllRestaurant,
   homePageVendorCard,
+  vendorPage,
 } from "./userProduct.controller.js";
 //cart
 import {
@@ -109,7 +113,7 @@ import {
 import { orderDetails } from "./userOrder.controller.js";
 
 //user coupons
-import { getCoupon,applyCouponCode } from "./userCoupon.controller.js";
+import { getCoupon, applyCouponCode } from "./userCoupon.controller.js";
 //-------------------------------------------------------------------------------------------------
 //exporting controller endponits
 
@@ -149,9 +153,7 @@ export {
   deleteProductItem,
 };
 //restarant image
-export {
-  addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage
-};
+export { addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage };
 
 //customer profile
 export {
@@ -176,7 +178,13 @@ export {
 export { createWorkingHours };
 //---------------------------------------------------
 //exporting all products for users
-export { userGetAllCategories, userGetAllProductItems, userGetAllRestaurant ,homePageVendorCard};
+export {
+  userGetAllCategories,
+  userGetAllProductItems,
+  userGetAllRestaurant,
+  homePageVendorCard,
+  vendorPage,
+};
 //cart
 export {
   addToCart,
@@ -195,4 +203,4 @@ export { addToFavorites, removefromFavorites, getAllFavorites };
 //user order details
 export { orderDetails };
 //coupons
-export { getCoupon ,applyCouponCode};
+export { getCoupon, applyCouponCode };

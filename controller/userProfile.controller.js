@@ -273,7 +273,7 @@ const addUserAddress = async (req, res, next) => {
   try {
     const { street, city, state, landmark, pincode } = req.body;
     const userId = req.userId;
-
+  
     // Check if the user is authorized
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -287,7 +287,7 @@ const addUserAddress = async (req, res, next) => {
     }
 
     // Add the new address to the user's addresses array
-    existingUser.addresses.push({
+    existingUser.address.push({
       street,
       city,
       state,

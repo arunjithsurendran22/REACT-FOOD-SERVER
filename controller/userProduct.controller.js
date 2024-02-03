@@ -49,11 +49,10 @@ const userGetAllRestaurant = async (req, res, next) => {
   }
 };
 
-
 //GET: get vendor Details for home page card endpoint
 const homePageVendorCard = async (req, res, next) => {
   try {
-    const vendorData = await vendorModel.find();
+    const vendorData = await vendorModel.find().maxTimeMS(15000);;
 
     const formattedData = vendorData.map((item) => ({
       vendorId: item._id,
@@ -66,7 +65,38 @@ const homePageVendorCard = async (req, res, next) => {
 
     res.status(200).json(formattedData);
   } catch (error) {
-    next(error)
+    next(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// GET: restaurant page
+const vendorPage = async (req, res, next) => {
+  try {
+    const { vendorId } = req.params;
+    
+    const vendorData = await vendorModel.findOne({ _id: vendorId }).maxTimeMS(15000);;
+
+    if (!vendorData) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    const formattedData = {
+      vendorId: vendorData._id,
+      name: vendorData.name,
+      backgroundImage: vendorData.backgroundImage,
+      logoImage: vendorData.logoImage,
+      address: vendorData.address,
+      workingHours: vendorData.workingHours,
+      products: vendorData.products,
+    };
+
+    res
+      .status(200)
+      .json({ message: "Successfully fetched data", formattedData });
+  } catch (error) {
+    next(error);
+    console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -76,4 +106,5 @@ export {
   userGetAllProductItems,
   userGetAllRestaurant,
   homePageVendorCard,
+  vendorPage,
 };
