@@ -18,16 +18,16 @@ import {
   vendorPage,
   getCategories,
   getproductByCategory,
+  getAllProducts,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
 const router = express.Router();
 //category items
 router.get("/add-on-category/get/list",getCategories );
-router.get("/add-on-category/get/product-list/:vendorId/:categoryId",getproductByCategory );
 //product list
-router.get("/product-items/get/list", );
-router.get("/restaurant/get/list",)
+router.get("/add-on-product/get/product-list/:vendorId/:categoryId",getproductByCategory );
+router.get("/add-on-product/get/product-all-list/:vendorId",  getAllProducts);
 //Add to cart
 router.get("/cart-items/get/list", userAuthenticate, viewCart);
 router.post("/add-to-cart/create/:productId/:vendorId", userAuthenticate, addToCart);

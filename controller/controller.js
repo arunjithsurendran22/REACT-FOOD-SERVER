@@ -153,8 +153,15 @@ import {
   vendorPage,
   getCategories,
   getproductByCategory,
+  getAllProducts,
 } from "./userProduct.controller.js";
-export { homePageVendorCard, vendorPage, getCategories, getproductByCategory };
+export {
+  homePageVendorCard,
+  vendorPage,
+  getCategories,
+  getproductByCategory,
+  getAllProducts,
+};
 //cart
 import {
   addToCart,

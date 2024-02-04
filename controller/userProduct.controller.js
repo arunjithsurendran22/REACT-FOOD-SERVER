@@ -80,16 +80,39 @@ const getCategories = async (req, res, next) => {
 const getproductByCategory = async (req, res, next) => {
   try {
     const { vendorId, categoryId } = req.params;
+
     const vendorData = await vendorModel.findById(vendorId);
 
-    const products = vendorData.products.filter(product => product.categoryId.toString() === categoryId);
+    const products = vendorData.products.filter(
+      (product) => product.categoryId.toString() === categoryId
+    );
 
     res.status(200).json({ products });
   } catch (error) {
+    next(error)
     console.error("Error in getproductByCategory:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+const getAllProducts = async (req, res, next) => {
+  try {
+    const { vendorId } = req.params;
+  
+    const vendorData = await vendorModel.findById(vendorId);
 
+    const allProducts = vendorData.products;
+    
+    res.status(200).json(allProducts);
+  } catch (error) {
+    next(error)
+    res.status(500).json({ message: "Internal server Error" });
+  }
+};
 
-export { homePageVendorCard, vendorPage, getCategories  ,getproductByCategory};
+export {
+  homePageVendorCard,
+  vendorPage,
+  getCategories,
+  getproductByCategory,
+  getAllProducts,
+};
