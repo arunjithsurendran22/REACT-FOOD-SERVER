@@ -184,6 +184,38 @@ const getAllVendors = async (req, res, next) => {
   }
 };
 
+// DELETE: delete vendor by ID
+const deleteVendor = async (req, res, next) => {
+  try {
+    const adminId = req.adminId;
+    const role = req.role;
+    const { vendorId } = req.params;
+
+    if (role === "admin") {
+      // Authorization
+      if (!adminId) {
+        return res.json({ message: "Unauthorized" });
+      }
+      // Find the vendor and delete it
+      const deletedVendor = await vendorModel
+        .findByIdAndDelete(vendorId)
+        .maxTimeMS(30000);
+
+      if (!deletedVendor) {
+        return res.status(404).json({ message: "Vendor not found" });
+      }
+
+      res.status(200).json({ message: "Vendor deleted successfully" });
+    } else {
+      console.log("Admin not found");
+      return res.status(403).json({ message: "Forbidden" });
+    }
+  } catch (error) {
+    console.log(error, "Failed to delete the vendor");
+    next(error);
+  }
+};
+
 //GET :get all customers details
 const getAllCustomers = async (req, res, next) => {
   try {
@@ -216,4 +248,11 @@ const getAllCustomers = async (req, res, next) => {
   }
 };
 
-export { registerAdmin, loginAdmin, getAdminProfile, getAllVendors ,getAllCustomers};
+export {
+  registerAdmin,
+  loginAdmin,
+  getAdminProfile,
+  getAllVendors,
+  getAllCustomers,
+  deleteVendor,
+};

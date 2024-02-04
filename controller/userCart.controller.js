@@ -359,7 +359,7 @@ const validatePayment = async (req, res, next) => {
 // POST: Save payment details to the database
 const order = async (req, res, next) => {
   try {
-    const { orderId, paymentId, userId, addressId, cartItem, totalToPay } =
+    const { orderId, paymentId, userId, address, cartItem, totalToPay } =
       req.body;
 
     if (!userId) {
@@ -372,16 +372,13 @@ const order = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Assuming addressId is the index of the address in the user's addresses array
-    const address = existingUser.address[addressId];
-
     // Step 2: Create Order Object
     const orderDetails = {
       orderId: orderId,
       paymentId: paymentId,
       userId: userId,
       address: address,
-      products: cartItem.map(item => ({
+      products: cartItem.map((item) => ({
         productId: item.productId,
         vendorId: item.vendorId,
         productTitle: item.productTitle,
@@ -390,7 +387,7 @@ const order = async (req, res, next) => {
         quantity: item.quantity,
         totalPrice: item.totalPrice,
       })),
-      totalAmount: totalToPay, 
+      totalAmount: totalToPay,
     };
     // Step 3: Save Order to User
     existingUser.orders.push(orderDetails);
@@ -406,8 +403,6 @@ const order = async (req, res, next) => {
     console.error("Failed to save to the database");
   }
 };
-
-
 
 export {
   addToCart,

@@ -2,6 +2,8 @@ import express from "express";
 import {
   addFoodCategory,
   getFoodCategories,
+  updateFoodCategory,
+  deleteFoodCategory,
   addCoupon,
   getAllCoupons,
   updateCoupon,
@@ -14,7 +16,9 @@ const router = express.Router();
 
 //admin add foodcategories endpoints
 router.post("/add-on-category/create",adminAuthorization,uploading,addFoodCategory);
-router.get("/food-categories", adminAuthorization, getFoodCategories);
+router.get("/food-categories/get", adminAuthorization, getFoodCategories);
+router.put("/food-categories/edit/:categoryId",adminAuthorization , updateFoodCategory)
+router.delete("/food-category/delete/:categoryId" ,adminAuthorization ,deleteFoodCategory)
 
 //coupons
 router.post("/add-coupon/create", adminAuthorization, addCoupon);

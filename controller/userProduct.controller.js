@@ -1,58 +1,9 @@
-import { vendorModel } from "../models/model.js";
-
-//GET:controller for get all vendors food categories
-const userGetAllCategories = async (req, res, next) => {
-  try {
-    //fetch all category items
-    const categories = await foodCategoryModel.find();
-    return res.status(200).json(categories);
-  } catch (error) {
-    next(error);
-    console.log(error, "error for fetching category");
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-//GET :controller for get all products items
-const userGetAllProductItems = async (req, res, next) => {
-  try {
-    //fecth all product items
-    const productItem = await productModel.find();
-
-    return res.status(200).json(productItem);
-  } catch (error) {
-    next(error);
-    console.log(error, "error for fetching product items");
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-//GET:get all popular restaurant endpoint
-const userGetAllRestaurant = async (req, res, next) => {
-  try {
-    const vendor = await vendorModel.find();
-    // Use populate to get background images for each vendor
-    const vendorsWithBackgroundImages = await vendorModel
-      .find()
-      .populate("image");
-
-    console.log(vendorsWithBackgroundImages);
-    console.log(backgroundImage);
-    const newArray = vendor.map(({ _id, name }) => ({ _id, name }));
-
-    console.log(newArray);
-
-    res.status(200).json({ message: "Succesfully", vendor });
-  } catch (error) {
-    next(error);
-    console.log(error, "failed to get restaurant ");
-  }
-};
+import { adminModel, vendorModel } from "../models/model.js";
 
 //GET: get vendor Details for home page card endpoint
 const homePageVendorCard = async (req, res, next) => {
   try {
-    const vendorData = await vendorModel.find().maxTimeMS(15000);;
+    const vendorData = await vendorModel.find().maxTimeMS(15000);
 
     const formattedData = vendorData.map((item) => ({
       vendorId: item._id,
@@ -74,8 +25,10 @@ const homePageVendorCard = async (req, res, next) => {
 const vendorPage = async (req, res, next) => {
   try {
     const { vendorId } = req.params;
-    
-    const vendorData = await vendorModel.findOne({ _id: vendorId }).maxTimeMS(15000);;
+
+    const vendorData = await vendorModel
+      .findOne({ _id: vendorId })
+      .maxTimeMS(15000);
 
     if (!vendorData) {
       return res.status(404).json({ message: "Vendor not found" });
@@ -101,10 +54,42 @@ const vendorPage = async (req, res, next) => {
   }
 };
 
-export {
-  userGetAllCategories,
-  userGetAllProductItems,
-  userGetAllRestaurant,
-  homePageVendorCard,
-  vendorPage,
+// GET: Get categories
+const getCategories = async (req, res, next) => {
+  try {
+    // Fetch categories from the admin model
+    const adminData = await adminModel.findOne({}, { foodCategory: 1, _id: 1 });
+
+    if (!adminData) {
+      return res.status(404).json({ message: "Categories not found" });
+    }
+
+    const categories = adminData.foodCategory;
+
+    res
+      .status(200)
+      .json({ message: "Categories successfully fetched", categories });
+  } catch (error) {
+    next(error);
+    console.error("Failed to fetch categories", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
+
+// GET: get all products with categories
+const getproductByCategory = async (req, res, next) => {
+  try {
+    const { vendorId, categoryId } = req.params;
+    const vendorData = await vendorModel.findById(vendorId);
+
+    const products = vendorData.products.filter(product => product.categoryId.toString() === categoryId);
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error("Error in getproductByCategory:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export { homePageVendorCard, vendorPage, getCategories  ,getproductByCategory};

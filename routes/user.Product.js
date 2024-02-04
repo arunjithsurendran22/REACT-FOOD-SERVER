@@ -1,7 +1,5 @@
 import express from "express";
 import {
-  userGetAllCategories,
-  userGetAllProductItems,
   addToCart,
   viewCart,
   updateQuantity,
@@ -9,7 +7,6 @@ import {
   addToFavorites,
   removefromFavorites,
   getAllFavorites,
-  userGetAllRestaurant,
   selectAddressAddToCart,
   orderPayment,
   validatePayment,
@@ -19,15 +16,18 @@ import {
   applyCouponCode,
   homePageVendorCard,
   vendorPage,
+  getCategories,
+  getproductByCategory,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
 const router = express.Router();
 //category items
-router.get("/add-on-category/get/list", userGetAllCategories);
+router.get("/add-on-category/get/list",getCategories );
+router.get("/add-on-category/get/product-list/:vendorId/:categoryId",getproductByCategory );
 //product list
-router.get("/product-items/get/list", userGetAllProductItems);
-router.get("/restaurant/get/list",userGetAllRestaurant)
+router.get("/product-items/get/list", );
+router.get("/restaurant/get/list",)
 //Add to cart
 router.get("/cart-items/get/list", userAuthenticate, viewCart);
 router.post("/add-to-cart/create/:productId/:vendorId", userAuthenticate, addToCart);

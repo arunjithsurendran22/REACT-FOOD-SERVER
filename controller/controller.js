@@ -8,12 +8,32 @@ import {
   getAdminProfile,
   getAllVendors,
   getAllCustomers,
+  deleteVendor,
 } from "./adminProfile.controller.js";
+//admin profile
+export {
+  registerAdmin,
+  loginAdmin,
+  getAdminProfile,
+  getAllVendors,
+  getAllCustomers,
+  deleteVendor,
+};
 import {
   addFoodCategory,
   getFoodCategories,
+  updateFoodCategory,
+  deleteFoodCategory,
 } from "./adminProduct.controller.js";
+//admin product
+export {
+  addFoodCategory,
+  getFoodCategories,
+  updateFoodCategory,
+  deleteFoodCategory,
+};
 import { dashboardStatus } from "./adminDashboard.controller.js";
+export { dashboardStatus };
 //add coupon
 import {
   addCoupon,
@@ -21,6 +41,8 @@ import {
   updateCoupon,
   deleteCoupon,
 } from "./Admincoupon.controller.js";
+//coupon
+export { addCoupon, getAllCoupons, updateCoupon, deleteCoupon };
 // ---------------------------------------------------------------------------------
 //Vendor endpoints
 // ---------------------------------------------------------------------------------
@@ -35,6 +57,17 @@ import {
   logoutVendor,
   vendorCustomers,
 } from "./vendorProfile.controller.js";
+//restaurant profile
+export {
+  registerVendor,
+  loginVendor,
+  vendorProfile,
+  updateVendorProfile,
+  refreshTokenVendor,
+  addVendorAddress,
+  logoutVendor,
+  vendorCustomers,
+};
 //retaurant image controller
 import {
   addBackgroundImage,
@@ -42,7 +75,8 @@ import {
   addLogoImage,
   getLogoImage,
 } from "./vendorImage.controller.js";
-
+//restarant image
+export { addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage };
 //restaurant product -food category and menu-items
 import {
   getAllFoodCategories,
@@ -52,6 +86,15 @@ import {
   updateProductItem,
   deleteProductItem,
 } from "./vendorProduct.controller.js";
+//restaurant product
+export {
+  getAllFoodCategories,
+  getAllProductItems,
+  getSpecificProductItem,
+  addProductItem,
+  updateProductItem,
+  deleteProductItem,
+};
 
 //customer Profile Auth
 import {
@@ -65,96 +108,6 @@ import {
   deleteUserAddress,
   getUserAddresses,
 } from "./userProfile.controller.js";
-//order
-import {
-  vendorOrderList,
-  updateOrderStatus,
-  getUserAddressAndItems,
-} from "./vendorOrder.controller.js";
-//vendor dashboard
-import { getCustomerCount } from "./vendorDashboard.controller.js";
-
-import {
-  addPincodeDeliveryFee,
-  getPincodeDeliveryFee,
-  editPincodeDeliveryFee,
-  deletePincodeDeliveryFee,
-} from "./vendorDelivery.controller.js";
-import { createWorkingHours } from "./vendorSettings.controller.js";
-// ------------------------------------------------------------------------------------------------------------
-//importing :get all products for seeing user
-// ---------------------------------------------------------------------------------
-import {
-  userGetAllCategories,
-  userGetAllProductItems,
-  userGetAllRestaurant,
-  homePageVendorCard,
-  vendorPage,
-} from "./userProduct.controller.js";
-//cart
-import {
-  addToCart,
-  viewCart,
-  updateQuantity,
-  removeCartItem,
-  selectAddressAddToCart,
-  orderPayment,
-  validatePayment,
-  order,
-} from "./userCart.controller.js";
-
-//favorites
-import {
-  addToFavorites,
-  removefromFavorites,
-  getAllFavorites,
-} from "./userFavorites.controller.js";
-//user order details
-import { orderDetails } from "./userOrder.controller.js";
-
-//user coupons
-import { getCoupon, applyCouponCode } from "./userCoupon.controller.js";
-//-------------------------------------------------------------------------------------------------
-//exporting controller endponits
-
-//Admin endpoints exporting
-//admin profile
-export {
-  registerAdmin,
-  loginAdmin,
-  getAdminProfile,
-  getAllVendors,
-  getAllCustomers,
-};
-//admin product
-export { addFoodCategory, getFoodCategories };
-export { dashboardStatus };
-//coupon
-export { addCoupon, getAllCoupons, updateCoupon, deleteCoupon };
-// -----------------------------------------------------------
-//restaurant profile
-export {
-  registerVendor,
-  loginVendor,
-  vendorProfile,
-  updateVendorProfile,
-  refreshTokenVendor,
-  addVendorAddress,
-  logoutVendor,
-  vendorCustomers,
-};
-//restaurant product
-export {
-  getAllFoodCategories,
-  getAllProductItems,
-  getSpecificProductItem,
-  addProductItem,
-  updateProductItem,
-  deleteProductItem,
-};
-//restarant image
-export { addBackgroundImage, getBackgroundImage, addLogoImage, getLogoImage };
-
 //customer profile
 export {
   userRegister,
@@ -167,24 +120,52 @@ export {
   deleteUserAddress,
   getUserAddresses,
 };
+//order
+import {
+  vendorOrderList,
+  updateOrderStatus,
+  getUserAddressAndItems,
+} from "./vendorOrder.controller.js";
 export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
+//vendor dashboard
+import { getCustomerCount } from "./vendorDashboard.controller.js";
 export { getCustomerCount };
+
+import {
+  addPincodeDeliveryFee,
+  getPincodeDeliveryFee,
+  editPincodeDeliveryFee,
+  deletePincodeDeliveryFee,
+} from "./vendorDelivery.controller.js";
 export {
   addPincodeDeliveryFee,
   getPincodeDeliveryFee,
   editPincodeDeliveryFee,
   deletePincodeDeliveryFee,
 };
+import { createWorkingHours } from "./vendorSettings.controller.js";
 export { createWorkingHours };
-//---------------------------------------------------
-//exporting all products for users
-export {
-  userGetAllCategories,
-  userGetAllProductItems,
-  userGetAllRestaurant,
+// ------------------------------------------------------------------------------------------------------------
+//importing :get all products for seeing user
+// ---------------------------------------------------------------------------------
+import {
   homePageVendorCard,
   vendorPage,
-};
+  getCategories,
+  getproductByCategory,
+} from "./userProduct.controller.js";
+export { homePageVendorCard, vendorPage, getCategories, getproductByCategory };
+//cart
+import {
+  addToCart,
+  viewCart,
+  updateQuantity,
+  removeCartItem,
+  selectAddressAddToCart,
+  orderPayment,
+  validatePayment,
+  order,
+} from "./userCart.controller.js";
 //cart
 export {
   addToCart,
@@ -196,11 +177,21 @@ export {
   validatePayment,
   order,
 };
-
+//favorites
+import {
+  addToFavorites,
+  removefromFavorites,
+  getAllFavorites,
+} from "./userFavorites.controller.js";
 //favorites
 export { addToFavorites, removefromFavorites, getAllFavorites };
-
+//user order details
+import { orderDetails } from "./userOrder.controller.js";
 //user order details
 export { orderDetails };
+
+//user coupons
+import { getCoupon, applyCouponCode } from "./userCoupon.controller.js";
 //coupons
 export { getCoupon, applyCouponCode };
+//-------------------------------------------------------------------------------------------------

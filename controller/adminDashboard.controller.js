@@ -15,7 +15,7 @@ const dashboardStatus = async (req, res, next) => {
     }
 
     const customerCount = await userModel.countDocuments();
-    const orderCount = await orderModel.countDocuments();
+    
 
     res.status(200).json({ customerCount, orderCount });
   } catch (error) {

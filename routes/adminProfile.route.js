@@ -5,6 +5,7 @@ import {
   getAdminProfile,
   getAllVendors,
   getAllCustomers,
+  deleteVendor,
 } from "../controller/controller.js";
 import { adminAuthorization } from "../middleware/adminAuthMiddleware.js";
 
@@ -16,6 +17,7 @@ router.post("/login", loginAdmin);
 router.get("/admin-profile", adminAuthorization, getAdminProfile);
 //get all vendors details
 router.get("/vendor-profile-get", adminAuthorization, getAllVendors);
+router.delete("/vendor-profile-delete/:vendorId",adminAuthorization , deleteVendor)
 //get all customers details
 router.get("/user-profile/get", adminAuthorization, getAllCustomers);
 
