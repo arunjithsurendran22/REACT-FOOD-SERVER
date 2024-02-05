@@ -17,6 +17,7 @@ import {
   homePageVendorCard,
   vendorPage,
   getCategories,
+  getAllCategoriesUnique,
   getproductByCategory,
   getAllProducts,
 } from "../controller/controller.js";
@@ -24,7 +25,8 @@ import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
 const router = express.Router();
 //category items
-router.get("/add-on-category/get/list",getCategories );
+router.get("/add-on-category/get/list", getCategories );
+router.get("/add-on-category/get-unique-category/list/:vendorId", getAllCategoriesUnique );
 //product list
 router.get("/add-on-product/get/product-list/:vendorId/:categoryId",getproductByCategory );
 router.get("/add-on-product/get/product-all-list/:vendorId",  getAllProducts);

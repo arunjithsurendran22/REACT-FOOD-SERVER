@@ -76,6 +76,37 @@ const getCategories = async (req, res, next) => {
   }
 };
 
+const getAllCategoriesUnique = async (req, res, next) => {
+  try {
+    const { vendorId } = req.params;
+
+    const vendorData = await vendorModel.findById(vendorId).maxTimeMS(30000);
+
+    if (!vendorData) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    const products = vendorData.products;
+
+    const uniqueProductCategories = new Set(
+      products.map((item) => String(item.categoryId))
+    );
+
+    const adminCategory = await adminModel.find();
+    const categories = adminCategory[0].foodCategory;
+    // Filter categories based on uniqueProductCategories
+    const filteredCategories = categories.filter((category) =>
+      uniqueProductCategories.has(category._id.toString())
+    );
+
+    return res.status(200).json({ filteredCategories });
+  } catch (error) {
+    next(error);
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 // GET: get all products with categories
 const getproductByCategory = async (req, res, next) => {
   try {
@@ -89,7 +120,7 @@ const getproductByCategory = async (req, res, next) => {
 
     res.status(200).json({ products });
   } catch (error) {
-    next(error)
+    next(error);
     console.error("Error in getproductByCategory:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -97,14 +128,14 @@ const getproductByCategory = async (req, res, next) => {
 const getAllProducts = async (req, res, next) => {
   try {
     const { vendorId } = req.params;
-  
+
     const vendorData = await vendorModel.findById(vendorId);
 
     const allProducts = vendorData.products;
-    
+
     res.status(200).json(allProducts);
   } catch (error) {
-    next(error)
+    next(error);
     res.status(500).json({ message: "Internal server Error" });
   }
 };
@@ -113,6 +144,7 @@ export {
   homePageVendorCard,
   vendorPage,
   getCategories,
+  getAllCategoriesUnique,
   getproductByCategory,
   getAllProducts,
 };

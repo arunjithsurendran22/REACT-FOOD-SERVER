@@ -152,6 +152,7 @@ import {
   homePageVendorCard,
   vendorPage,
   getCategories,
+  getAllCategoriesUnique,
   getproductByCategory,
   getAllProducts,
 } from "./userProduct.controller.js";
@@ -159,6 +160,7 @@ export {
   homePageVendorCard,
   vendorPage,
   getCategories,
+  getAllCategoriesUnique,
   getproductByCategory,
   getAllProducts,
 };
