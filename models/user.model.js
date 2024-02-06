@@ -86,6 +86,9 @@ const userSchema = new mongoose.Schema({
       orderId: {
         type: String,
       },
+      vendorId: {
+        type: String,
+      },
       paymentId: {
         type: String,
       },

@@ -43,6 +43,8 @@ import {
 } from "./Admincoupon.controller.js";
 //coupon
 export { addCoupon, getAllCoupons, updateCoupon, deleteCoupon };
+import { getAllOrders } from "./adminOrders.controller.js";
+export { getAllOrders };
 // ---------------------------------------------------------------------------------
 //Vendor endpoints
 // ---------------------------------------------------------------------------------

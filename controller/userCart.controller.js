@@ -354,13 +354,13 @@ const validatePayment = async (req, res, next) => {
   }
 };
 
-//POST: payment details will save to database
+
 // POST: Save payment details to the database
 const order = async (req, res, next) => {
   try {
-    const { orderId, paymentId, userId, address, cartItem, totalToPay } =
+    const { orderId, paymentId, userId, vendorId,address, cartItem, totalToPay } =
       req.body;
-
+    console.log(vendorId);
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -373,6 +373,7 @@ const order = async (req, res, next) => {
 
     // Step 2: Create Order Object
     const orderDetails = {
+      vendorId:vendorId,
       orderId: orderId,
       paymentId: paymentId,
       userId: userId,

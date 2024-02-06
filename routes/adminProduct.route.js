@@ -8,6 +8,7 @@ import {
   getAllCoupons,
   updateCoupon,
   deleteCoupon,
+  getAllOrders,
 } from "../controller/controller.js";
 import { adminAuthorization } from "../middleware/adminAuthMiddleware.js";
 import { uploading } from "../multer/multer.js";
@@ -25,5 +26,9 @@ router.post("/add-coupon/create", adminAuthorization, addCoupon);
 router.get("/add-coupon/get" ,adminAuthorization , getAllCoupons)
 router.put("/add-coupon/edit/:couponId",adminAuthorization , updateCoupon)
 router.delete("/add-coupon/delete/:couponId" ,adminAuthorization ,deleteCoupon)
+
+
+//orders
+router.get("/orders-list/get"  , adminAuthorization, getAllOrders)
 
 export default router;
