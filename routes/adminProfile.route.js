@@ -6,6 +6,7 @@ import {
   getAllVendors,
   getAllCustomers,
   deleteVendor,
+  logoutAdmin,
 } from "../controller/controller.js";
 import { adminAuthorization } from "../middleware/adminAuthMiddleware.js";
 
@@ -21,4 +22,7 @@ router.delete("/vendor-profile-delete/:vendorId",adminAuthorization , deleteVend
 //get all customers details
 router.get("/user-profile/get", adminAuthorization, getAllCustomers);
 
+
+//logout
+router.post("/logout", adminAuthorization, logoutAdmin);
 export default router;

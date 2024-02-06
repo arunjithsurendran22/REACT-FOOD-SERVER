@@ -247,6 +247,19 @@ const getAllCustomers = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+// POST: logout admin endpoint
+const logoutAdmin = async (req, res, next) => {
+  try {
+    res.clearCookie("accessTokenAdmin");
+    res.clearCookie("refreshTokenAdmin");
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    next(error);
+    console.log(error, "logout failed");
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 export {
   registerAdmin,
@@ -255,4 +268,5 @@ export {
   getAllVendors,
   getAllCustomers,
   deleteVendor,
+  logoutAdmin,
 };

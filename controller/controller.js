@@ -9,6 +9,7 @@ import {
   getAllVendors,
   getAllCustomers,
   deleteVendor,
+  logoutAdmin,
 } from "./adminProfile.controller.js";
 //admin profile
 export {
@@ -18,6 +19,7 @@ export {
   getAllVendors,
   getAllCustomers,
   deleteVendor,
+  logoutAdmin,
 };
 import {
   addFoodCategory,
