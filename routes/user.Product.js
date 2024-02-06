@@ -20,6 +20,8 @@ import {
   getAllCategoriesUnique,
   getproductByCategory,
   getAllProducts,
+  cancelOrder,
+  ratingProduct,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -49,6 +51,10 @@ router.post("/order/payment",userAuthenticate , order)
 
 //Order details
 router.get("/order-list/get",userAuthenticate , orderDetails)
+router.post("/order-list/cancel-order/:orderId",userAuthenticate , cancelOrder)
+
+//user product rating
+router.post("/rating-product/:productId", userAuthenticate , ratingProduct)
 
 //coupons 
 router.get("/coupon-list/get", userAuthenticate, getCoupon)

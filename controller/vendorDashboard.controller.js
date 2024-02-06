@@ -23,14 +23,13 @@ const getCustomerCount = async (req, res, next) => {
       const usersWithPurchases = await userModel.find({
         "orders.products.vendorId": vendorId
       });
-      console.log(usersWithPurchases);
       // Get the count of customers
       const customerCount = usersWithPurchases.length;
 
-      // Continue with your logic...
       return res.status(200).json({ message: "Success", customerCount });
     }
   } catch (error) {
+    next(error)
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
   }

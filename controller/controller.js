@@ -195,9 +195,13 @@ import {
 //favorites
 export { addToFavorites, removefromFavorites, getAllFavorites };
 //user order details
-import { orderDetails } from "./userOrder.controller.js";
+import {
+  orderDetails,
+  cancelOrder,
+  ratingProduct,
+} from "./userOrder.controller.js";
 //user order details
-export { orderDetails };
+export { orderDetails, cancelOrder, ratingProduct };
 
 //user coupons
 import { getCoupon, applyCouponCode } from "./userCoupon.controller.js";

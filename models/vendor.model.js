@@ -81,6 +81,17 @@ const vendorSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "FoodCategory",
       },
+      ratings: [
+        {
+          userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "user",
+          },
+          rating: {
+            type: Number,
+          },
+        },
+      ],
     },
   ],
   workingHours: [

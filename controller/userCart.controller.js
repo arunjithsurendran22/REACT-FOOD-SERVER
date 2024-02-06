@@ -94,7 +94,6 @@ const addToCart = async (req, res, next) => {
     // Save the updated user model
     await existingUser.save();
 
-    console.log("Product added to cart successfully");
     res
       .status(200)
       .json({ message: "Product added to cart successfully", existingUser });
