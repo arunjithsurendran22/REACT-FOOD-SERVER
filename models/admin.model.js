@@ -10,6 +10,12 @@ const adminSchema = mongoose.Schema({
   role: {
     type: String,
   },
+  profit:{
+    type:String,
+  },
+  orderBalances:{
+    type:String,
+  },
   foodCategory: [
     {
       title: {

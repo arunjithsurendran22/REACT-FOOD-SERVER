@@ -131,6 +131,19 @@ const vendorSchema = new mongoose.Schema({
       },
     },
   ],
+  orderBalance: [
+    {
+      vendorId: {
+        type: String,
+      },
+      orderId: {
+        type: String,
+      },
+      balanceAmount: {
+        type: String,
+      },
+    },
+  ],
 });
 
 const vendorModel = mongoose.model("vendor", vendorSchema);
