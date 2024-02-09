@@ -154,6 +154,7 @@ export { createWorkingHours };
 // ---------------------------------------------------------------------------------
 import {
   homePageVendorCard,
+  getCategoryVendorCard,
   vendorPage,
   getCategories,
   getAllCategoriesUnique,
@@ -162,6 +163,7 @@ import {
 } from "./userProduct.controller.js";
 export {
   homePageVendorCard,
+  getCategoryVendorCard,
   vendorPage,
   getCategories,
   getAllCategoriesUnique,

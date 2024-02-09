@@ -15,6 +15,7 @@ import {
   getCoupon,
   applyCouponCode,
   homePageVendorCard,
+  getCategoryVendorCard,
   vendorPage,
   getCategories,
   getAllCategoriesUnique,
@@ -29,6 +30,7 @@ const router = express.Router();
 //category items
 router.get("/add-on-category/get/list", getCategories );
 router.get("/add-on-category/get-unique-category/list/:vendorId", getAllCategoriesUnique );
+router.get("/add-on-category/get-vendor-List/:categoryId", getCategoryVendorCard )
 //product list
 router.get("/add-on-product/get/product-list/:vendorId/:categoryId",getproductByCategory );
 router.get("/add-on-product/get/product-all-list/:vendorId",  getAllProducts);

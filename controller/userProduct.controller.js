@@ -20,6 +20,39 @@ const homePageVendorCard = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+//GET:category wise vendors list
+const getCategoryVendorCard = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+
+    const vendorData = await vendorModel
+      .find({
+        "products.categoryId": categoryId,
+      })
+      .maxTimeMS(15000);
+
+    // If there's no vendor found for the given categoryId
+    if (!vendorData || vendorData.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No vendors found for the specified category" });
+    }
+
+    const formattedData = vendorData.map((item) => ({
+      vendorId: item._id,
+      name: item.name,
+      backgroundImage: item.backgroundImage,
+      logoImage: item.logoImage || "",
+      address: item.address,
+      workingHours: item.workingHours,
+    }));
+
+    res.status(200).json({ formattedData });
+  } catch (error) {
+    next(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 // GET: restaurant page
 const vendorPage = async (req, res, next) => {
@@ -142,6 +175,7 @@ const getAllProducts = async (req, res, next) => {
 
 export {
   homePageVendorCard,
+  getCategoryVendorCard,
   vendorPage,
   getCategories,
   getAllCategoriesUnique,
