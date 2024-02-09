@@ -228,7 +228,7 @@ const updateUserProfile = async (req, res, next) => {
 //USER PROFILE PHOTO UPLOAD
 // ----------------------------------------------------------------------------
 
-//POST: add user profile photo endpoint
+// POST: add user profile photo endpoint
 const addUserProfilePhoto = async (req, res, next) => {
   try {
     const userId = req.userId;
@@ -240,28 +240,38 @@ const addUserProfilePhoto = async (req, res, next) => {
     if (!req.file || !req.file.path) {
       return res.status(400).json({ message: 'Invalid file upload' });
     }
-    //check if user exists
+
+    // Check if user exists
     const existingUser = await userModel.findById(userId);
 
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
-    } else {
-      //upload image to cloudinary
-      const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
-
-      existingUser.image = secure_url;
-
-      //save the data to the database
-      await existingUser.save();
-
-      res.status(201).json({
-        message: "Profile photo uploaded successfully",
-        image: req.file.path,
-      });
     }
+
+    // Upload image to cloudinary
+    const { secure_url } = await cloudinary.v2.uploader.upload(req.file.path);
+
+    // Check if there is an existing image for the user
+    if (existingUser.image) {
+      // If an existing image is found, delete it from Cloudinary
+      if (existingUser.image.public_id) {
+        await cloudinary.v2.uploader.destroy(existingUser.image.public_id);
+      }
+    }
+
+    // Update the user's image path in the database
+    existingUser.image = secure_url;
+
+    // Save the data to the database
+    await existingUser.save();
+
+    res.status(201).json({
+      message: "Profile photo uploaded successfully",
+      image: secure_url,
+    });
   } catch (error) {
+    console.error("Error adding profile photo:", error);
     next(error);
-    console.log(error, "error adding profile photo");
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -349,14 +359,12 @@ const updateUserAddress = async (req, res, next) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // DELETE: delete user address endpoint
 const deleteUserAddress = async (req, res, next) => {
   try {
     const { addressId } = req.params;
     const userId = req.userId;
-
-    console.log(addressId);
+    
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -368,8 +376,13 @@ const deleteUserAddress = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Check if the user has addresses
+    if (!existingUser.address || !Array.isArray(existingUser.address)) {
+      return res.status(404).json({ message: "User has no addresses" });
+    }
+
     // Find the index of the address in the user's addresses array
-    const addressIndex = existingUser.addresses.findIndex(
+    const addressIndex = existingUser.address.findIndex(
       (address) => address._id.toString() === addressId
     );
 
@@ -381,7 +394,7 @@ const deleteUserAddress = async (req, res, next) => {
     }
 
     // Remove the address from the addresses array
-    existingUser.addresses.splice(addressIndex, 1);
+    existingUser.address.splice(addressIndex, 1);
 
     // Save the updated user document
     await existingUser.save();
@@ -391,9 +404,9 @@ const deleteUserAddress = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 // GET: get all addresses for a user endpoint
 const getUserAddresses = async (req, res, next) => {
