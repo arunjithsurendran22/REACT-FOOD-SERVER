@@ -29,7 +29,7 @@ router.post("/add-profile-photo", userAuthenticate, uploading, addUserProfilePho
 // User Addresses
 router.get("/add-address/get", userAuthenticate, getUserAddresses);
 router.post("/add-address/add", userAuthenticate, addUserAddress);
-router.put("/update-address/:address_id", userAuthenticate, updateUserAddress);
-router.delete("/delete-address/:address_id", userAuthenticate, deleteUserAddress);
+router.put("/update-address/:addressId", userAuthenticate, updateUserAddress);
+router.delete("/delete-address/:addressId", userAuthenticate, deleteUserAddress);
 
 export default router;

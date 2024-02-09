@@ -356,6 +356,8 @@ const deleteUserAddress = async (req, res, next) => {
     const { addressId } = req.params;
     const userId = req.userId;
 
+    console.log(addressId);
+
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
