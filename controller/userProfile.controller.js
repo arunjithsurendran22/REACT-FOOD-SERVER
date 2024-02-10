@@ -437,6 +437,18 @@ const getUserAddresses = async (req, res, next) => {
   }
 };
 
+// POST: logout user endpoint
+const logoutUser = async (req, res, next) => {
+  try {
+    res.clearCookie("accessTokenUser");
+    res.clearCookie("refreshTokenUser");
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    next(error);
+    console.error(error, "logout failed");
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export {
   userRegister,
@@ -448,4 +460,5 @@ export {
   updateUserAddress,
   deleteUserAddress,
   getUserAddresses,
+  logoutUser,
 };

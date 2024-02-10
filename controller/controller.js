@@ -111,6 +111,7 @@ import {
   updateUserAddress,
   deleteUserAddress,
   getUserAddresses,
+  logoutUser,
 } from "./userProfile.controller.js";
 //customer profile
 export {
@@ -123,6 +124,7 @@ export {
   updateUserAddress,
   deleteUserAddress,
   getUserAddresses,
+  logoutUser,
 };
 //order
 import {
