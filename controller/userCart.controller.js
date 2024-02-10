@@ -164,16 +164,16 @@ const removeCartItem = async (req, res, next) => {
   try {
     const userId = req.userId;
     const { Id } = req.params;
-    // If the user is not authenticated
+
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    // Find the user
+
     const existingUser = await userModel.findById(userId);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    // Find the cart item and remove the specified product
+
     const cartItemIndex = existingUser.cartItems.findIndex((item) =>
       item.products.some((product) => product._id.toString() === Id)
     );
@@ -186,30 +186,30 @@ const removeCartItem = async (req, res, next) => {
       (product) => product._id.toString() === Id
     );
 
-    // Update the grand total in the cart before removing the product
     const totalBeforeRemove = existingUser.cartItems[
       cartItemIndex
     ].products.reduce((acc, item) => acc + item.totalPrice, 0);
 
-    // Remove the specified product from the cart item
     existingUser.cartItems[cartItemIndex].products = existingUser.cartItems[
       cartItemIndex
     ].products.filter((product) => product._id.toString() !== Id);
 
-    // Recalculate the total price for each product in the cart
     existingUser.cartItems[cartItemIndex].products.forEach((product) => {
       product.totalPrice = product.price * product.quantity;
     });
 
-    // Calculate the total price and grand total after removing the product
     const totalAfterRemove = existingUser.cartItems[
       cartItemIndex
     ].products.reduce((acc, item) => acc + item.totalPrice, 0);
 
-    // Update the grand total in the cart
     existingUser.cartItems[cartItemIndex].grandTotal = totalAfterRemove;
 
-    // Save the updated user model
+    // If cart becomes empty after removing the product, remove applied coupon
+    if (existingUser.cartItems[cartItemIndex].products.length === 0) {
+      existingUser.cartItems[cartItemIndex].couponCode = "";
+      existingUser.cartItems[cartItemIndex].grandTotal = 0;
+    }
+
     await existingUser.save();
 
     res.status(200).json({
@@ -224,6 +224,7 @@ const removeCartItem = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 // View Cart
 const viewCart = async (req, res, next) => {
@@ -248,12 +249,14 @@ const viewCart = async (req, res, next) => {
 
     // Retrieve the cart details from the user model
     const cartItem = user.cartItems[0];
+  
 
     res.status(200).json({
       message: "Cart retrieved successfully",
       cart: cartItem,
       grandTotal: cartItem.grandTotal,
     });
+
   } catch (error) {
     console.error(error);
     next(error);

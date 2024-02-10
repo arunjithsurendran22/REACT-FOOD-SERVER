@@ -212,7 +212,11 @@ import {
 export { orderDetails, cancelOrder, ratingProduct };
 
 //user coupons
-import { getCoupon, applyCouponCode } from "./userCoupon.controller.js";
+import {
+  getCoupon,
+  applyCouponCode,
+  removeCouponCode,
+} from "./userCoupon.controller.js";
 //coupons
-export { getCoupon, applyCouponCode };
+export { getCoupon, applyCouponCode, removeCouponCode };
 //-------------------------------------------------------------------------------------------------

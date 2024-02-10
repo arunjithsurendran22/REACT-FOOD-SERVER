@@ -1,31 +1,35 @@
-import {  userModel } from "../models/model.js";
+import { adminModel, userModel } from "../models/model.js";
 
-//GET :get coupon codes
 const getCoupon = async (req, res, next) => {
   try {
     const userId = req.userId;
 
-    //Unauthorized
+    // Unauthorized
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    //checked if user is already exists
+    // Check if user exists
     const existingUser = await userModel.findById(userId);
-
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const coupons = await couponModel.find();
+    // Fetch admin coupon for the logged-in admin
+    const adminData = await adminModel.find();
+    if (!adminData) {
+      return res.status(404).json({ message: "Admin data not found" });
+    }
+
+    // Extract coupons from admin data
+    const coupons = adminData[0].coupon;
+
     res.status(200).json({ message: "Successfully fetched coupons", coupons });
   } catch (error) {
+    console.log("Failed to get coupons:", error);
     next(error);
-    console.log("failed get coupons");
-    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 const applyCouponCode = async (req, res, next) => {
   try {
     const userId = req.userId;
@@ -43,45 +47,45 @@ const applyCouponCode = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Find the user's cart
-    const userCart = await cartModel.findOne({ userId });
-
-    if (!userCart) {
-      return res.status(400).json({ message: "User cart not found" });
+    // Fetch the coupon from the admin data
+    const adminData = await adminModel.findOne();
+    if (!adminData) {
+      return res.status(404).json({ message: "Admin data not found" });
     }
 
-    // Find the coupon
-    const existingCoupon = await couponModel.findById(couponId);
+    const coupon = adminData.coupon.id(couponId);
 
-    if (!existingCoupon) {
-      return res.json({ message: "Coupon not found" });
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found" });
     }
-    // Get the current grandTotal from the cart schema
+
+    // Get the user's cart
+    const userCart = existingUser.cartItems[0];
+
+    // Check if the coupon is already applied
+    if (userCart.couponCode === coupon.title) {
+      return res.status(400).json({ message: "Coupon already applied" });
+    }
+
+    // Calculate the discount
+    const discountPercentage = coupon.percentage;
     const totalAmount = userCart.grandTotal;
-
-    const couponTitle = existingCoupon.title;
-
-    const cartCouponCode = userCart.couponCode;
-
-    if (cartCouponCode === couponTitle) {
-      return res.status(400).json({ message: "Coupon alredy applied" });
-    }
-    // Calculate the coupon discount
-    const discountPercentage = existingCoupon.percentage;
     const discountAmount = (totalAmount * discountPercentage) / 100;
     const discountedTotal = totalAmount - discountAmount;
 
-    // Update the grandTotal in the cart schema
+    // Update the cart with the coupon details and discounted total
+    userCart.couponCode = coupon.title;
     userCart.grandTotal = discountedTotal;
-    userCart.couponCode = couponTitle;
-    // Save the changes to the cart
-    const savedUserCart = await userCart.save();
 
-    if (savedUserCart) {
-      res.json({ message: "Coupon applied successfully", discountedTotal });
-    } else {
-      res.status(500).json({ message: "Failed to update cart" });
-    }
+    // Save the updated user cart
+    await existingUser.save();
+
+    res
+      .status(200)
+      .json({
+        message: "Coupon applied successfully",
+        updatedCart: existingUser.cartItems[0],
+      });
   } catch (error) {
     next(error);
     console.error(error);
@@ -89,4 +93,49 @@ const applyCouponCode = async (req, res, next) => {
   }
 };
 
-export { getCoupon, applyCouponCode };
+const removeCouponCode = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { couponId } = req.params;
+
+    // Unauthorized
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if user exists
+    const existingUser = await userModel.findById(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Get the user's cart
+    const userCart = existingUser.cartItems[0];
+
+    // Check if a coupon is applied
+    if (!userCart.couponCode) {
+      return res.status(400).json({ message: "No coupon applied" });
+    }
+
+    // Remove the applied coupon details
+    userCart.couponCode = "";
+    userCart.grandTotal = userCart.products.reduce(
+      (total, product) => total + product.totalPrice,
+      0
+    );
+
+    // Save the updated user cart
+    await existingUser.save();
+
+    res.json({
+      message: "Coupon removed successfully",
+      grandTotal: userCart.grandTotal,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { getCoupon, applyCouponCode, removeCouponCode };
