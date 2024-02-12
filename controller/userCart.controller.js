@@ -225,7 +225,6 @@ const removeCartItem = async (req, res, next) => {
   }
 };
 
-
 // View Cart
 const viewCart = async (req, res, next) => {
   try {
@@ -249,14 +248,12 @@ const viewCart = async (req, res, next) => {
 
     // Retrieve the cart details from the user model
     const cartItem = user.cartItems[0];
-  
 
     res.status(200).json({
       message: "Cart retrieved successfully",
       cart: cartItem,
       grandTotal: cartItem.grandTotal,
     });
-
   } catch (error) {
     console.error(error);
     next(error);
@@ -357,13 +354,19 @@ const validatePayment = async (req, res, next) => {
   }
 };
 
-
 // POST: Save payment details to the database
 const order = async (req, res, next) => {
   try {
-    const { orderId, paymentId, userId, vendorId,address, cartItem, totalToPay } =
-      req.body;
-    console.log(vendorId);
+    const {
+      orderId,
+      paymentId,
+      userId,
+      vendorId,
+      address,
+      cartItems,
+      totalToPay,
+    } = req.body;
+
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -376,12 +379,12 @@ const order = async (req, res, next) => {
 
     // Step 2: Create Order Object
     const orderDetails = {
-      vendorId:vendorId,
+      vendorId: vendorId,
       orderId: orderId,
       paymentId: paymentId,
       userId: userId,
       address: address,
-      products: cartItem.map((item) => ({
+      products: cartItems.map((item) => ({
         productId: item.productId,
         vendorId: item.vendorId,
         productTitle: item.productTitle,

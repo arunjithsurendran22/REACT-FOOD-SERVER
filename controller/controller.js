@@ -207,9 +207,10 @@ import {
   orderDetails,
   cancelOrder,
   ratingProduct,
+  getUserProductRating,
 } from "./userOrder.controller.js";
 //user order details
-export { orderDetails, cancelOrder, ratingProduct };
+export { orderDetails, cancelOrder, ratingProduct,getUserProductRating };
 
 //user coupons
 import {

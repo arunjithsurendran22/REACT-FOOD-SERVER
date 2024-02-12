@@ -126,7 +126,7 @@ const userLogin = async (req, res, next) => {
       secure: true,
       path: "/",
     });
-    return res.json({
+    return res.status(200).json({
       message: "User Login successful",
       _id: existingUser._id,
       name: existingUser.name,

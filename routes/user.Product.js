@@ -24,6 +24,7 @@ import {
   cancelOrder,
   ratingProduct,
   removeCouponCode,
+  getUserProductRating,
 } from "../controller/controller.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -57,8 +58,8 @@ router.get("/order-list/get",userAuthenticate , orderDetails)
 router.post("/order-list/cancel-order/:orderId",userAuthenticate , cancelOrder)
 
 //user product rating
-router.post("/rating-product/:productId", userAuthenticate , ratingProduct)
-
+router.post("/product-rating/:vendorId/:productId", userAuthenticate , ratingProduct)
+router.get("/product-rating/get/:vendorId/:productId", userAuthenticate , getUserProductRating)
 //coupons 
 router.get("/coupon-list/get", userAuthenticate, getCoupon)
 router.post("/coupon-list/apply-coupon/:couponId", userAuthenticate, applyCouponCode)
