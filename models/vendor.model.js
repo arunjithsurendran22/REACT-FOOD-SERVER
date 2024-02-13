@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const vendorSchema = new mongoose.Schema({
+  allow:{
+    type:String,
+    default:'block'
+  },
   name: {
     type: String,
   },

@@ -184,37 +184,42 @@ const getAllVendors = async (req, res, next) => {
   }
 };
 
-// DELETE: delete vendor by ID
-const deleteVendor = async (req, res, next) => {
+// PUT: block or unblock vendor by ID
+const blockOrUnblockVendor = async (req, res, next) => {
   try {
     const adminId = req.adminId;
     const role = req.role;
     const { vendorId } = req.params;
+    const { allow } = req.body;
 
     if (role === "admin") {
       // Authorization
       if (!adminId) {
         return res.json({ message: "Unauthorized" });
       }
-      // Find the vendor and delete it
-      const deletedVendor = await vendorModel
-        .findByIdAndDelete(vendorId)
-        .maxTimeMS(30000);
 
-      if (!deletedVendor) {
+      // Update vendor's allow status
+      const updatedVendor = await vendorModel.findByIdAndUpdate(
+        vendorId,
+        { allow },
+        { new: true }
+      );
+
+      if (!updatedVendor) {
         return res.status(404).json({ message: "Vendor not found" });
       }
 
-      res.status(200).json({ message: "Vendor deleted successfully" });
+      res.status(200).json({ message: "Vendor updated successfully", updatedVendor });
     } else {
       console.log("Admin not found");
       return res.status(403).json({ message: "Forbidden" });
     }
   } catch (error) {
-    console.log(error, "Failed to delete the vendor");
+    console.log(error, "Failed to update the vendor");
     next(error);
   }
 };
+
 
 //GET :get all customers details
 const getAllCustomers = async (req, res, next) => {
@@ -267,6 +272,6 @@ export {
   getAdminProfile,
   getAllVendors,
   getAllCustomers,
-  deleteVendor,
+  blockOrUnblockVendor,
   logoutAdmin,
 };

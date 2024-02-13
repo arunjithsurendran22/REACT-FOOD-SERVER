@@ -8,7 +8,7 @@ import {
   getAdminProfile,
   getAllVendors,
   getAllCustomers,
-  deleteVendor,
+  blockOrUnblockVendor,
   logoutAdmin,
 } from "./adminProfile.controller.js";
 //admin profile
@@ -18,7 +18,7 @@ export {
   getAdminProfile,
   getAllVendors,
   getAllCustomers,
-  deleteVendor,
+  blockOrUnblockVendor,
   logoutAdmin,
 };
 import {

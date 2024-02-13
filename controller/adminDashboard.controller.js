@@ -92,6 +92,7 @@ const calculateProfitAndLoss = async (req, res, next) => {
 
     res.status(200).json({ adminProfit, vendorProfits });
   } catch (error) {
+    next(error)
     console.error("Failed to calculate profit and loss:", error);
     res.status(500).json({ message: "Internal Server error" });
   }

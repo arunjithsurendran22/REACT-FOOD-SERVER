@@ -83,19 +83,19 @@ const loginVendor = async (req, res, next) => {
     }
 
     // Check if the vendor is already registered
-    const existingVendor = await vendorModel
-      .findOne({ email })
-      .maxTimeMS(20000);
+    const existingVendor = await vendorModel.findOne({ email });
 
     if (!existingVendor) {
       return res.json({ message: "User not found" });
     }
 
+    // Check if the vendor is allowed to log in
+    if (existingVendor.allow !== 'unblock') {
+      return res.json({ message: "You are not allowed to log in. Please contact the admin." });
+    }
+
     // Check if the password is a match
-    const passwordMatch = await comparePassword(
-      password,
-      existingVendor.password
-    );
+    const passwordMatch = await comparePassword(password, existingVendor.password);
     if (!passwordMatch) {
       return res.json({ message: "Invalid password" });
     }
@@ -148,6 +148,7 @@ const loginVendor = async (req, res, next) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 // POST: Refresh vendor token endpoint
 const refreshTokenVendor = async (req, res, next) => {

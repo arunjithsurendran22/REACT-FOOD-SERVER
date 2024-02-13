@@ -17,7 +17,7 @@ import { uploading } from "../multer/multer.js";
 const router = express.Router();
 
 router.get("/add-on-category/get/list" ,vendorAuthenticate , getAllFoodCategories)
-// Restaurant: Menu Item
+// vendor products endponits
 router.get("/add-on-item/get/list", vendorAuthenticate,  getAllProductItems );
 router.get("/add-on-item/get/specific-product/:productId",vendorAuthenticate, getSpecificProductItem)
 router.post("/add-on-item/create/:categoryId", vendorAuthenticate, uploading, addProductItem);
