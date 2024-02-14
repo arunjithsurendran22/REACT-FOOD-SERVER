@@ -34,8 +34,11 @@ export {
   updateFoodCategory,
   deleteFoodCategory,
 };
-import { dashboardStatus } from "./adminDashboard.controller.js";
-export { dashboardStatus };
+import {
+  dashboardStatus,
+  calculateProfitAndLoss,
+} from "./adminDashboard.controller.js";
+export { dashboardStatus, calculateProfitAndLoss };
 //add coupon
 import {
   addCoupon,
@@ -210,7 +213,7 @@ import {
   getUserProductRating,
 } from "./userOrder.controller.js";
 //user order details
-export { orderDetails, cancelOrder, ratingProduct,getUserProductRating };
+export { orderDetails, cancelOrder, ratingProduct, getUserProductRating };
 
 //user coupons
 import {

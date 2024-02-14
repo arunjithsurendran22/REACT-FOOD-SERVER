@@ -1,4 +1,4 @@
-import { adminModel, userModel } from "../models/model.js";
+import { adminModel, vendorModel ,userModel } from "../models/model.js";
 
 const dashboardStatus = async (req, res, next) => {
   try {
@@ -16,7 +16,7 @@ const dashboardStatus = async (req, res, next) => {
 
     const existingUsers = await userModel.find().maxTimeMS(15000);
     const sales = existingUsers.map((item) => item.orders);
-    console.log(sales);
+
     const customerCount = await userModel.countDocuments();
     let totalOrders = 0;
     existingUsers.forEach((user) => {
@@ -31,71 +31,91 @@ const dashboardStatus = async (req, res, next) => {
   }
 };
 
-///POST:profit calculation
 const calculateProfitAndLoss = async (req, res, next) => {
   try {
+    const adminId = req.adminId;
+    const adminData = await adminModel.findById(adminId);
+   // Access admin's role
+
+    if (!adminId) {
+      return res.status(401).json("Unauthorized");
+    }
+
     const users = await userModel.find();
     const vendors = await vendorModel.find();
 
-    // Initialize total profit for admin and vendors
-    let adminProfit = 0;
-    let vendorProfits = {};
-    let orderBalances = [];
+    // Initialize an object to store vendor balances per day
+    let vendorBalancePerDay = {};
 
-    // Calculate profit for each user's order
+    // Initialize an object to store profit and loss per day
+    let profitAndLossPerDay = {};
+
+    // Loop through each user and their orders
     for (const user of users) {
       for (const order of user.orders) {
-        // Calculate admin fee (1% of total amount)
-        const adminFee = order.totalAmount * 0.1;
-        adminProfit += adminFee;
+        // Calculate admin fee (10% of order total)
+        const adminFeePerOrder = order.totalAmount * 0.1; // Admin charge per order
+        const remainingBalance = order.totalAmount - adminFeePerOrder;
 
-        // Calculate remaining balance for vendor
-        const vendorId = order.vendorId;
-        const remainingBalance = order.totalAmount - adminFee;
+        // Calculate profit or loss for admin per day
+        const orderDate = new Date(order.createdAt);
+        const formattedDate = orderDate.toISOString().split("T")[0];
 
-        // Update vendor's profit
-        if (!vendorProfits[vendorId]) {
-          vendorProfits[vendorId] = 0;
+        // Initialize profit and loss for the day if not already present
+        if (!profitAndLossPerDay[formattedDate]) {
+          profitAndLossPerDay[formattedDate] = {
+            date: orderDate,
+            profit: 0,
+            loss: 0,
+          };
         }
-        vendorProfits[vendorId] += remainingBalance;
 
-        // Store order balance information
-        orderBalances.push({
-          vendorId: vendorId,
-          orderId: order._id,
-          balanceAmount: remainingBalance,
-        });
+        // Update profit and loss for the day
+        profitAndLossPerDay[formattedDate].profit += remainingBalance;
+        profitAndLossPerDay[formattedDate].loss += 5; // Fixed loss amount per order
+
+        // Store balance amount per day for vendor
+        const vendorId = order.vendorId;
+        if (!vendorBalancePerDay[vendorId]) {
+          vendorBalancePerDay[vendorId] = {};
+        }
+        if (!vendorBalancePerDay[vendorId][formattedDate]) {
+          vendorBalancePerDay[vendorId][formattedDate] = 0;
+        }
+        vendorBalancePerDay[vendorId][formattedDate] += remainingBalance;
       }
     }
 
-    // Save admin's profit in the database
-    const admin = await adminModel.findOneAndUpdate(
-      {},
-      { $inc: { profit: adminProfit } },
-      { new: true }
-    );
-    // Save vendor's profits and order balances in the database
-    for (const vendorId of Object.keys(vendorProfits)) {
-      // Update vendor's profit
-      await vendorModel.findByIdAndUpdate(vendorId, {
-        $inc: { profit: vendorProfits[vendorId] },
-      });
+    // Save profit and loss per day in the admin model
+    await adminModel.findByIdAndUpdate(adminId, {
+      $set: {
+        profitAndLossPerDay: Object.values(profitAndLossPerDay),
+      },
+    });
 
-      // Save order balances for the vendor
-      const vendorOrderBalances = orderBalances.filter(
-        (order) => order.vendorId === vendorId
-      );
+    // Save vendor balances per day
+    for (const vendorId of Object.keys(vendorBalancePerDay)) {
       await vendorModel.findByIdAndUpdate(vendorId, {
-        $push: { orderBalance: { $each: vendorOrderBalances } },
+        $push: {
+          balancePerDay: {
+            $each: Object.entries(vendorBalancePerDay[vendorId]).map(
+              ([date, balance]) => ({ date, balance })
+            ),
+          },
+        },
       });
     }
 
-    res.status(200).json({ adminProfit, vendorProfits });
+    res.status(200).json({ profitAndLossPerDay, vendorBalancePerDay });
   } catch (error) {
-    next(error)
+    next(error);
     console.error("Failed to calculate profit and loss:", error);
     res.status(500).json({ message: "Internal Server error" });
   }
 };
 
-export { dashboardStatus };
+
+
+
+
+export { dashboardStatus, calculateProfitAndLoss };

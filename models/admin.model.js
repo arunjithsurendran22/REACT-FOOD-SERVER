@@ -10,12 +10,37 @@ const adminSchema = mongoose.Schema({
   role: {
     type: String,
   },
-  profit:{
-    type:String,
-  },
-  orderBalances:{
-    type:String,
-  },
+  // Store profit and loss for each day in a single array
+  profitAndLossPerDay: [
+    {
+      date: {
+        type: Date,
+      },
+      profit: {
+        type: Number,
+        default: 0,
+      },
+      loss: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
+  vendorBalancesPerDay: [
+    {
+      vendorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Vendor", // Reference to the Vendor model
+      },
+      date: {
+        type: Date,
+      },
+      balance: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
   foodCategory: [
     {
       title: {
@@ -48,6 +73,6 @@ const adminSchema = mongoose.Schema({
   ],
 });
 
-const adminModel = mongoose.model("admin", adminSchema);
+const adminModel = mongoose.model("Admin", adminSchema);
 
 export default adminModel;
