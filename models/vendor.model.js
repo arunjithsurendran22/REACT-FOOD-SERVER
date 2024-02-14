@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const vendorSchema = new mongoose.Schema({
-  allow:{
-    type:String,
-    default:'block'
+  allow: {
+    type: String,
+    default: "block",
   },
   name: {
     type: String,
@@ -135,17 +135,10 @@ const vendorSchema = new mongoose.Schema({
       },
     },
   ],
-  orderBalance: [
+  balancePerDay: [
     {
-      vendorId: {
-        type: String,
-      },
-      orderId: {
-        type: String,
-      },
-      balanceAmount: {
-        type: String,
-      },
+      date: Date,
+      balance: Number,
     },
   ],
 });
