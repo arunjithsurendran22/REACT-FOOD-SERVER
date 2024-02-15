@@ -16,9 +16,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build application
-        run: npm run build
-
       - name: Install PM2
         run: npm install pm2 -g
 
