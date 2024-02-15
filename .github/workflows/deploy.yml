@@ -1,0 +1,34 @@
+name: Deploy to AWS EC2 with PM2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install PM2
+        run: npm install pm2 -g
+
+      - name: Deploy application to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: i-0105c13da2c2e4d69
+          username: ec2-user
+          key: MIIEogIBAAKCAQEAp0oJlVe6UG5wyRa6Den+bf7Mp3a2cg2F5zGMnc7P8ZauEWvMerH8ogxNOXlAJYC15DyoJ2VqLPJYKEuB8z67DlFDos3HM2epjA6SmssjC2Hk69IGzg7PI96Fxvvwkazk+l6KnDFpOpf2gG6LA61+tcZaiul1Dz6eyh2IAaMk9QPfRmX++qqgeEXsL5fS0yXLtvaf5gzn4cx8ljZb2Gsjrlw034VNChaioZnPqbukmjLtCcU2h/x65ef4fcBPyK/UaPrJJgRaaqW3zBWgEjH+ZJ1AEHELr4m4SDllE3xciTgoS1stQ68tPvFNegTj6I/0Ju7kd/jJJc4xrMOCs9GhtQIDAQABAoIBAAg9YVN1yruDdRKyh99/kwSf9DybYEkl2V6V1jM/qIZhwZkiEiRI+ASTTopyKnKucEcZpb6rBBvKpAT4EyKECHqgDhDKyfECPhuj7ByrvMImxDvJUIR9vj4qC7TNXAAQ4AZk+bbPyDsWmRGiYD6CISea6YLGFPn3P6L86WILQxq+TbIMRw7eRmoBq5Kajfx6laE0jfb77e6f8yw97bT3tIkAvEcH9hYsIY4iUhjuXYSi1CNlkCsEMLXol+NGnBIG2ciMtWNH6Ezhu4AKGmc2yyUW9UvPJm3IFY2C+O3XDCnuU4NPQXo46Dkdse5ZXlU9VxnwXfqikRrB/25dwRPxnoECgYEA0GDNvqbMa/EdE1BrH35cPM7FMAY5oRqmdnf0Z/cmGPCXHbm7BivMviO6fxwdJN2yQ3VGe2ZgkTF9/abY9iwFAXxk9eTs3uhDGDgcHytTIqqMOJeJlil4PjvTRMxY079Ix7dBFszxFey26wnIftkbgkweadjDGyJpPFg2h47kY0kCgYEAzYVRvWG4WpKSrMGBCQ7z5ikNBaQJcvycNLwl4eK+a3BEMiFUf3t0vUsgU8jnRC1oLLwDXYEQrFBiio1tRUJYCx7Th8F3AAvmPbuAIVAYFr1jorFVrPbNAlQMyuFPyWzKdvjCeK+nX84cUuQUDZ3qG6B8vQA8reiAYhv9o8Xc3w0CgYAeW7wd5pcpsrsVsUWqFPLDOSypTn7e5c8Su280JmG6iHK7te91erQdj38APcxRLqtmAJQALm4rORat+bzqQIeKK+FZobyQzS3ZPXN7Zwh5qHc9V3aIFgqapoSlJVBbqSalUiF9fOYy14XewFIhiOflF8nmidoC/gRu8jsfjMXhYQKBgE82AiIWxsIJ2gRBdGU0YSalTcKNzaKG4AGnPoaIKNIp6+7ST8nuoDjQ+r2wIgpx4cPUFwvz0aRIOyKhjary/hITKH4bP61B6NSELscoIpCpH/y1koreeHdcQ63yFxlQF9yw1etD8COJwfrksyHoajGJsmn57GkuwkSN+z0i5pUFAoGARzj4nsMseWluk+kRzz203+flW0NELL12q55priZm2DLmQ6D2/nuFGADOFdv6MqxgvvvMcs2Nj6iQWMnHerEDrbPpxzAHk6e3cWModFMkvZW/zmRz05Ezgklcx7IOOO0uYKLwcty3aKVQR4QyVgbLO2kRs+GJ9f82Xk7on0u3XXM=
+          script: |
+            cd /nodejs
+            git pull origin main
+            pm2 reload pm2.config.json --env production
