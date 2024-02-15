@@ -42,29 +42,54 @@ const vendorProfitLoss = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const existingVendor = await vendorModel.findById(vendorId);
+    // Find the vendor's balances in the admin data
+    const adminData = await adminModel.findOne({});
 
-    if (!existingVendor) {
-      return res.status(404).json({ message: "Vendor not found" });
+    if (!adminData || !adminData.vendorBalancesPerDay) {
+      return res
+        .status(404)
+        .json({ message: "Vendor balances not found in admin data" });
     }
 
-    // Retrieve admin data (assuming you'll use it for investment calculation)
-    const adminData = await adminModel.find();
+    const vendorBalances = adminData.vendorBalancesPerDay.find(
+      (balance) => balance.vendorId.toString() === vendorId
+    );
 
-    if (!adminData || adminData.length === 0) {
-      return res.status(404).json({ message: "Admin data not found" });
+    if (!vendorBalances) {
+      return res.status(404).json({ message: "Vendor balances not found" });
     }
 
-    
+    // Calculate profit and loss for each day
+    const profitLossPerDay = vendorBalances.balancesPerDay.map((balance) => {
+      const loss = balance.balance * 0.1; // 10% loss
+      const profit = balance.balance - loss;
+      return {
+        date: balance.date,
+        profit,
+        loss,
+      };
+    });
 
-    res.status(200).json({ message: "Profit and loss calculated successfully" });
+    profitLossPerDay.forEach((entry) => {
+      adminData.vendorProfitAndLossPerDay.push({
+        vendorId: vendorId,
+        date: entry.date,
+        profit: entry.profit,
+        loss: entry.loss,
+      });
+    });
+
+    await adminData.save();
+
+    // Sending the response
+    res.status(200).json({ profitLossPerDay });
   } catch (error) {
-    console.error("Failed to calculate profit and loss for vendor:", error);
+    console.error(
+      "Failed to calculate and store profit and loss for vendor:",
+      error
+    );
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
-
 
 export { getCustomerCount, vendorProfitLoss };

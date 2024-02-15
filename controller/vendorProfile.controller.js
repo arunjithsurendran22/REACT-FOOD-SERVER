@@ -345,25 +345,19 @@ const vendorCustomers = async (req, res, next) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    // Retrieve orders related to the specific vendorId
-    const orderDetails = await orderModel.find({ vendorId: vendorId });
+     // Find all users who have placed orders to the specified vendor
+     const usersWithOrdersToVendor = await userModel.find({ "orders.vendorId": vendorId });
+    console.log(usersWithOrdersToVendor);
+    
+    const customerDetails  =usersWithOrdersToVendor.map(user=>({
+      image:user.image,
+      name:user.name,
+      email:user.email,
+      mobile:user.mobile
+    }
+    ))
 
-    // Destructuring to get userId
-    const { userId } = orderDetails[0];
-
-    // Find user details from the userModel
-    const userDetails = await userModel.findById(userId);
-
-    const { image, name, email, mobile } = userDetails;
-
-    const customerDetails = [
-      {
-        image,
-        name,
-        email,
-        mobile,
-      },
-    ];
+    
 
     res.status(200).json({
       message: "UserData fetched successfully",

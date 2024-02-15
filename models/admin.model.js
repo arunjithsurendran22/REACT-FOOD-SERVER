@@ -44,6 +44,25 @@ const adminSchema = mongoose.Schema({
       ],
     },
   ],
+  vendorProfitAndLossPerDay: [
+    {
+      vendorId:{
+        type:String,
+      },
+      date: {
+        type: Date,
+      },
+      profit: {
+        type: Number,
+        default: 0,
+      },
+      loss: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
+  
   foodCategory: [
     {
       title: {

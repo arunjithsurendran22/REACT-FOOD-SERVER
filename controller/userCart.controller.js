@@ -34,13 +34,12 @@ const addToCart = async (req, res, next) => {
     // Get the products array from the vendorProduct
     const productItem = vendorProduct.products;
 
-    // Find the matching product based on both _id and productId
+    // Find the matching product based on productId
     const matchingProduct = productItem.find(
       (item) => item._id.toString() === productId.toString()
     );
 
     if (!matchingProduct) {
-      console.log("Product not found with the given productId and vendorId.");
       return res.status(404).json({ message: "Product not found" });
     }
 
@@ -58,18 +57,30 @@ const addToCart = async (req, res, next) => {
       existingUser.cartItems.push(cartItem);
     }
 
-    // Check if the product already exists in the cartItem
-    const existingProduct = cartItem.products.find(
+    // Check if the cart has products
+    if (cartItem.products.length > 0) {
+      // Check if all products in the cart have the same vendorId
+      const isSameVendor = cartItem.products.every(
+        (product) => product.vendorId.toString() === vendorId.toString()
+      );
+
+      if (!isSameVendor) {
+        return res.status(400).json({ message: "Cannot mix products from different vendors" });
+      }
+    }
+
+    // Find if the product already exists in the cart
+    const productIndex = cartItem.products.findIndex(
       (product) =>
         product.productId.toString() === productId.toString() &&
         product.vendorId.toString() === vendorId.toString()
     );
 
-    if (existingProduct) {
+    if (productIndex !== -1) {
       // If the product already exists, increase the quantity
-      existingProduct.quantity += 1;
-      existingProduct.totalPrice =
-        existingProduct.quantity * existingProduct.price;
+      cartItem.products[productIndex].quantity += 1;
+      cartItem.products[productIndex].totalPrice =
+        cartItem.products[productIndex].quantity * cartItem.products[productIndex].price;
     } else {
       // If the product doesn't exist, add a new product to the cart
       const newProduct = {
@@ -94,15 +105,15 @@ const addToCart = async (req, res, next) => {
     // Save the updated user model
     await existingUser.save();
 
-    res
-      .status(200)
-      .json({ message: "Product added to cart successfully", existingUser });
+    return res.status(200).json({ message: "Product added to cart successfully", existingUser });
   } catch (error) {
     console.error(error);
     next(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 // PUT: Edit quantity of product item endpoint
 const updateQuantity = async (req, res, next) => {
