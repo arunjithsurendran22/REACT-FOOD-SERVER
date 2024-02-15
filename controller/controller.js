@@ -137,8 +137,11 @@ import {
 } from "./vendorOrder.controller.js";
 export { vendorOrderList, updateOrderStatus, getUserAddressAndItems };
 //vendor dashboard
-import { getCustomerCount } from "./vendorDashboard.controller.js";
-export { getCustomerCount };
+import {
+  getCustomerCount,
+  vendorProfitLoss,
+} from "./vendorDashboard.controller.js";
+export { getCustomerCount, vendorProfitLoss };
 
 import {
   addPincodeDeliveryFee,

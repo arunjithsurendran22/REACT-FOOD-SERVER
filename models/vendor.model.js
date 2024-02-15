@@ -135,10 +135,19 @@ const vendorSchema = new mongoose.Schema({
       },
     },
   ],
-  balancePerDay: [
+  profitAndLossPerDay: [
     {
-      date: Date,
-      balance: Number,
+      date: {
+        type: Date,
+      },
+      profit: {
+        type: Number,
+        default: 0,
+      },
+      loss: {
+        type: Number,
+        default: 0,
+      },
     },
   ],
 });

@@ -41,19 +41,21 @@ const calculateProfitAndLoss = async (req, res, next) => {
     }
 
     const users = await userModel.find();
-    const vendors = await vendorModel.find();
 
-    let vendorBalancePerDay = {};
     let profitAndLossPerDay = {};
+    let vendorBalancesPerDay = {};
 
     for (const user of users) {
       for (const order of user.orders) {
-        const adminFeePerOrder = order.totalAmount * 0.1;
-        const remainingBalance = order.totalAmount - adminFeePerOrder;
+        const adminFeePerOrder = 5; // Platform fee per order
+        const adminProfitPercentage = 0.1; // Admin profit percentage
+        const adminProfitPerOrder = order.totalAmount * adminProfitPercentage;
+        const remainingBalance = order.totalAmount - (adminFeePerOrder + adminProfitPerOrder);
 
         const orderDate = new Date(order.createdAt);
         const formattedDate = orderDate.toISOString().split("T")[0];
 
+        // Update profit and loss per day
         if (!profitAndLossPerDay[formattedDate]) {
           profitAndLossPerDay[formattedDate] = {
             date: orderDate,
@@ -62,48 +64,36 @@ const calculateProfitAndLoss = async (req, res, next) => {
           };
         }
 
-        profitAndLossPerDay[formattedDate].profit += remainingBalance;
+        profitAndLossPerDay[formattedDate].profit += adminProfitPerOrder;
         profitAndLossPerDay[formattedDate].loss += adminFeePerOrder;
 
+        // Update vendor balance per day
         const vendorId = order.vendorId;
-        if (!vendorBalancePerDay[vendorId]) {
-          vendorBalancePerDay[vendorId] = {};
+        if (!vendorBalancesPerDay[vendorId]) {
+          vendorBalancesPerDay[vendorId] = {};
         }
-        if (!vendorBalancePerDay[vendorId][formattedDate]) {
-          vendorBalancePerDay[vendorId][formattedDate] = [];
+        if (!vendorBalancesPerDay[vendorId][formattedDate]) {
+          vendorBalancesPerDay[vendorId][formattedDate] = 0; // Initialize balance to 0
         }
-        vendorBalancePerDay[vendorId][formattedDate].push({
-          date: orderDate,
-          balance: remainingBalance,
-          _id: order._id, // Include order ID if needed
-        });
+        vendorBalancesPerDay[vendorId][formattedDate] += remainingBalance; // Update balance with remaining amount
       }
     }
 
+    // Update admin model with profit and loss and vendor balances
     await adminModel.findByIdAndUpdate(adminId, {
       $set: {
         profitAndLossPerDay: Object.values(profitAndLossPerDay),
+        vendorBalancesPerDay: Object.entries(vendorBalancesPerDay).map(([vendorId, balancesPerDay]) => ({
+          vendorId,
+          balancesPerDay: Object.entries(balancesPerDay).map(([date, balance]) => ({
+            date,
+            balance
+          }))
+        }))
       },
     });
 
-    for (const vendorId of Object.keys(vendorBalancePerDay)) {
-      const updateResult = await vendorModel.findByIdAndUpdate(vendorId, {
-        $push: {
-          balancePerDay: {
-            $each: Object.entries(vendorBalancePerDay[vendorId]).map(
-              ([date, balances]) => ({
-                date,
-                ...balances,
-              })
-            ),
-          },
-        },
-      });
-      
-    }
-
-    console.log(vendorBalancePerDay);
-    res.status(200).json({ profitAndLossPerDay, vendorBalancePerDay });
+    res.status(200).json({ profitAndLossPerDay, vendorBalancesPerDay });
   } catch (error) {
     next(error);
     console.error("Failed to calculate profit and loss:", error);
