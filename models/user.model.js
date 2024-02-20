@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+  allow:{
+    type:String,
+    default:'unblock'
+  },
   name: {
     type: String,
   },

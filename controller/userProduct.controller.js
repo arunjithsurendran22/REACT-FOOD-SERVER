@@ -173,6 +173,17 @@ const getAllProducts = async (req, res, next) => {
   }
 };
 
+//get :search
+const search =async(req,res,next)=>{
+  try{
+    
+  }catch(error){
+    console.log("failed to search");
+    next(error)
+    res.status(500).json("Internal Server error")
+  }
+}
+
 export {
   homePageVendorCard,
   getCategoryVendorCard,

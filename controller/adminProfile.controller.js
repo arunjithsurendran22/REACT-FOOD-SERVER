@@ -265,6 +265,64 @@ const logoutAdmin = async (req, res, next) => {
   }
 };
 
+//POST :bloack and unbloxk
+const userBlock = async (req, res, next) => {
+  try {
+    const adminId = req.adminId;
+    const { userId } = req.params;
+
+
+    const admin = await adminModel.findById(adminId);
+
+    if (!admin) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userData = await userModel.findById(userId);
+
+    
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle the user's allow status between 'block' and 'unblock'
+    userData.allow = userData.allow === 'block' ? 'unblock' : 'block';
+    await userData.save();
+
+    res.status(200).json({ message: `User ${userData.allow}ed successfully` });
+  } catch (error) {
+    next(error)
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// POST: Delete a user
+const userDelete = async (req, res, next) => {
+  try {
+    const adminId = req.adminId;
+    const { userId } = req.params;
+
+    
+    const admin = await adminModel.findById(adminId);
+
+    if (!admin) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userData = await userModel.findByIdAndDelete(userId);
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
 
 export {
   registerAdmin,
@@ -274,4 +332,6 @@ export {
   getAllCustomers,
   blockOrUnblockVendor,
   logoutAdmin,
+  userBlock,
+  userDelete,
 };

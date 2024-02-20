@@ -69,30 +69,34 @@ const userLogin = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email) {
-      return res.json({ message: "email is required" });
+      return res.json({ message: "Email is required" });
     }
     if (!password || password.length < 6) {
       return res.json({
-        message: "password is required and should be at least 6 characters",
+        message: "Password is required and should be at least 6 characters",
       });
     }
-    //check if email already registered
+    
+    // Check if email already registered
     const existingUser = await userModel.findOne({ email }).maxTimeMS(20000);
 
     if (!existingUser) {
-      return res.json({ message: "user not found" });
+      return res.json({ message: "User not found" });
     }
-    //check if the password matches
-    const passwordMatch = await comparePassword(
-      password,
-      existingUser.password
-    );
+    
+    // Check if the user's account is unblocked
+    if (existingUser.allow !== 'unblock') {
+      return res.json({ message: "Your account is blocked. Please contact the admin." });
+    }
+
+    // Check if the password matches
+    const passwordMatch = await comparePassword(password, existingUser.password);
 
     if (!passwordMatch) {
       return res.json({ message: "Invalid password" });
     }
 
-    //generate ACCESS TOKEN
+    // Generate ACCESS TOKEN
     const accessTokenUser = jwt.sign(
       {
         name: existingUser.name,
@@ -103,7 +107,8 @@ const userLogin = async (req, res, next) => {
       accessTokenSecretUser,
       { expiresIn: "1h" }
     );
-    // generate REFRESH TOKEN
+    
+    // Generate REFRESH TOKEN
     const refreshTokenUser = jwt.sign(
       {
         id: existingUser._id,
@@ -113,7 +118,7 @@ const userLogin = async (req, res, next) => {
       { expiresIn: "30d" }
     );
 
-    //set the token as cookies in the response
+    // Set the token as cookies in the response
     res.cookie("accessTokenUser", accessTokenUser, {
       httpOnly: true,
       sameSite: "None",
@@ -126,6 +131,7 @@ const userLogin = async (req, res, next) => {
       secure: true,
       path: "/",
     });
+    
     return res.status(200).json({
       message: "User Login successful",
       _id: existingUser._id,
@@ -136,10 +142,11 @@ const userLogin = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-    console.log(error, "login failed");
+    console.error(error, "login failed");
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 //USER PROFILE MANAGEMENT
 // ------------------------------------------------------------------------------

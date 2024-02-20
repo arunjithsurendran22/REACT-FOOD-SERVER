@@ -10,6 +10,8 @@ import {
   getAllCustomers,
   blockOrUnblockVendor,
   logoutAdmin,
+  userBlock,
+  userDelete,
 } from "./adminProfile.controller.js";
 //admin profile
 export {
@@ -20,6 +22,8 @@ export {
   getAllCustomers,
   blockOrUnblockVendor,
   logoutAdmin,
+  userBlock,
+  userDelete,
 };
 import {
   addFoodCategory,

@@ -7,6 +7,8 @@ import {
   getAllCustomers,
   blockOrUnblockVendor,
   logoutAdmin,
+  userBlock,
+  userDelete,
 } from "../controller/controller.js";
 import { adminAuthorization } from "../middleware/adminAuthMiddleware.js";
 
@@ -22,7 +24,9 @@ router.put("/block-or-unblock-vendor/:vendorId",adminAuthorization , blockOrUnbl
 //get all customers details
 router.get("/user-profile/get", adminAuthorization, getAllCustomers);
 
-
+//admin block and unblock the user
+router.post("/user/block-unblock/:userId", adminAuthorization, userBlock);
+router.post("/delete-user/:userId", adminAuthorization, userDelete);
 //logout
 router.post("/logout", adminAuthorization, logoutAdmin);
 export default router;
