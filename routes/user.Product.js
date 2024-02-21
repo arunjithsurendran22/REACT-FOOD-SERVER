@@ -63,7 +63,7 @@ router.get("/product-rating/get/:vendorId/:productId", userAuthenticate , getUse
 //coupons 
 router.get("/coupon-list/get", userAuthenticate, getCoupon)
 router.post("/coupon-list/apply-coupon/:couponId", userAuthenticate, applyCouponCode)
-router.post("/coupon-list/delete-coupon/:couponId", userAuthenticate, removeCouponCode)
+router.delete("/coupon-list/delete-coupon/:couponId", userAuthenticate, removeCouponCode)
 //Home page vendor Card
 router.get("/vendor-card/get" ,homePageVendorCard)
 router.get("/vendor-page/:vendorId", vendorPage)
