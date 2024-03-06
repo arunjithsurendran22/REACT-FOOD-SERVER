@@ -16,6 +16,7 @@ const userRegister = async (req, res, next) => {
   try {
     const { name, mobile, email, password } = req.body;
 
+    console.log(name,mobile,email,password);
     if (!name) {
       return res.json({ message: "name is required" });
     }
