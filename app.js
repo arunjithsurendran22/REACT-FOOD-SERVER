@@ -34,6 +34,11 @@ mongoose
     console.log(error, "database disconnected.....");
   });
 
+  app.get('/', (req, res) => {
+    res.send("Welcome food delivey app");
+  });
+  
+
 //ROUTING
 app.use("/api/v1", vendorRoute);
 app.use("/api/v1", userRoute);
